@@ -111,7 +111,7 @@ namespace OmegaRace
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-           
+
 
             camera = new Camera(GraphicsDevice.Viewport, Vector2.Zero);
 
@@ -128,20 +128,20 @@ namespace OmegaRace
         {
             // TODO: use this.Content to load your game content here
 
-                world = new World(new Vector2(0, 0), true);
+            world = new World(new Vector2(0, 0), true);
 
-                myContactListener myContactListener = new myContactListener();
+            myContactListener myContactListener = new myContactListener();
 
-                world.ContactListener = myContactListener;
+            world.ContactListener = myContactListener;
 
 
-                Data.Instance().createData();
+            Data.Instance().createData();
 
-                state = gameState.game;
+            state = gameState.game;
 
-                player1 = PlayerManager.Instance().getPlayer(PlayerID.one);
-                player2 = PlayerManager.Instance().getPlayer(PlayerID.two);
-        
+            player1 = PlayerManager.Instance().getPlayer(PlayerID.one);
+            player2 = PlayerManager.Instance().getPlayer(PlayerID.two);
+
 
 
 
@@ -226,22 +226,33 @@ namespace OmegaRace
             {
                 player1.playerShip.physicsObj.body.Rotation += 0.1f;
             }
-
+            
             if (oldState.IsKeyDown(Keys.A) || P1oldPadState.IsButtonDown(Buttons.DPadLeft))
             {
-
                 player1.playerShip.physicsObj.body.Rotation -= 0.1f;
             }
 
-            if (oldState.IsKeyDown(Keys.W) || P1oldPadState.IsButtonDown(Buttons.DPadUp))
+            if (P1newPadState.ThumbSticks.Left.X > 0.2f || P1newPadState.ThumbSticks.Left.X < -0.2f)
+            {
+                player1.playerShip.physicsObj.body.Rotation += P1newPadState.ThumbSticks.Left.X / 20.0f;
+            }
+
+            if (oldState.IsKeyDown(Keys.W) || P1oldPadState.IsButtonDown(Buttons.DPadUp) || P1newPadState.ThumbSticks.Left.Y > 0.3f)
             {
                 Ship Player1Ship = player1.playerShip;
 
                 Vector2 direction = new Vector2((float)(Math.Cos(Player1Ship.physicsObj.body.GetAngle())), (float)(Math.Sin(Player1Ship.physicsObj.body.GetAngle())));
 
                 direction.Normalize();
-
-                direction *= shipSpeed;
+                if (P1newPadState.ThumbSticks.Left.Y > 0.3f)
+                {
+                    direction *= shipSpeed * P1newPadState.ThumbSticks.Left.Y;
+                }
+                else
+                {
+                    direction *= shipSpeed;
+                }
+                
 
                 Player1Ship.physicsObj.body.ApplyLinearImpulse(direction, Player1Ship.physicsObj.body.GetWorldCenter());
 
