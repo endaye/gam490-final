@@ -83,3 +83,11 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+# OmegaRace binary file
+OmegaRace/OmegaRace/OmegaRace/bin
+OmegaRace/OmegaRace/OmegaRace/obj
+OmegaRace/OmegaRace/OmegaRaceContent/obj
+*.suo
+*.cachefile
+XNA/Samples
