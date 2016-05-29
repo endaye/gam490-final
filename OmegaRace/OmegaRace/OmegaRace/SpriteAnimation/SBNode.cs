@@ -14,7 +14,7 @@ namespace SpriteAnimation
     class SBNode : Container
     {
         public batchEnum batchName;
-      //  public DisplayObject displayHead;
+        //  public DisplayObject displayHead;
 
         public SpriteSortMode sort;
         public BlendState blend;
@@ -83,16 +83,19 @@ namespace SpriteAnimation
 
 
             if (node.prev != null)
-            {	// middle or last node
+            {	
+                // middle or last node
                 node.prev.next = node.next;
             }
             else
-            {  // first
+            {  
+                // first
                 spriteListHead = node.next;
             }
 
             if (node.next != null)
-            {	// middle node
+            {	
+                // middle node
                 node.next.prev = node.prev;
             }
         }
