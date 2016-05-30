@@ -27,7 +27,6 @@ namespace OmegaRace
     /// </summary>
     public class Game1 : Microsoft.Xna.Framework.Game
     {
-
         GraphicsDeviceManager graphics;
         public GraphicsDeviceManager Graphics
         {
@@ -224,38 +223,28 @@ namespace OmegaRace
 
             if (oldState.IsKeyDown(Keys.D) || P1oldPadState.IsButtonDown(Buttons.DPadRight))
             {
-                player1.playerShip.physicsObj.body.Rotation += 0.1f;
+                 //player1.playerShip.physicsObj.body.Rotation += 0.1f;
+                RemoteToServer data = new RemoteToServer(ActionType.SHIP_ROTATION_RIGHT, 0.1f);
+                OutputQueue.Instance.add(data);
             }
             
             if (oldState.IsKeyDown(Keys.A) || P1oldPadState.IsButtonDown(Buttons.DPadLeft))
             {
-                player1.playerShip.physicsObj.body.Rotation -= 0.1f;
-            }
-
-            if (P1newPadState.ThumbSticks.Left.X > 0.2f || P1newPadState.ThumbSticks.Left.X < -0.2f)
-            {
-                player1.playerShip.physicsObj.body.Rotation += P1newPadState.ThumbSticks.Left.X / 20.0f;
+                //player1.playerShip.physicsObj.body.Rotation -= 0.1f;
+                RemoteToServer data = new RemoteToServer(ActionType.SHIP_ROTATION_LEFT, 0.1f);
+                OutputQueue.Instance.add(data);
             }
 
             if (oldState.IsKeyDown(Keys.W) || P1oldPadState.IsButtonDown(Buttons.DPadUp) || P1newPadState.ThumbSticks.Left.Y > 0.3f)
             {
-                Ship Player1Ship = player1.playerShip;
-
-                Vector2 direction = new Vector2((float)(Math.Cos(Player1Ship.physicsObj.body.GetAngle())), (float)(Math.Sin(Player1Ship.physicsObj.body.GetAngle())));
-
-                direction.Normalize();
-                if (P1newPadState.ThumbSticks.Left.Y > 0.3f)
-                {
-                    direction *= shipSpeed * P1newPadState.ThumbSticks.Left.Y;
-                }
-                else
-                {
-                    direction *= shipSpeed;
-                }
+                //Ship Player1Ship = player1.playerShip;
+                //Vector2 direction = new Vector2((float)(Math.Cos(Player1Ship.physicsObj.body.GetAngle())), (float)(Math.Sin(Player1Ship.physicsObj.body.GetAngle())));
+                //direction.Normalize();
+                //direction *= shipSpeed;
+                //Player1Ship.physicsObj.body.ApplyLinearImpulse(direction, Player1Ship.physicsObj.body.GetWorldCenter());
                 
-
-                Player1Ship.physicsObj.body.ApplyLinearImpulse(direction, Player1Ship.physicsObj.body.GetWorldCenter());
-
+                RemoteToServer data = new RemoteToServer(ActionType.SHIP_IMPULSE, shipSpeed);
+                OutputQueue.Instance.add(data);
 
             }
 
@@ -323,7 +312,22 @@ namespace OmegaRace
             P1oldPadState = P1newPadState;
             P2oldPadState = P2newPadState;
             oldState = newState;
+
+            ServerToRemoteData srd = new ServerToRemoteData();
+            srd.type = ObjectType.SHIP;
+            ShipData sd = new ShipData();
+            sd.rot = player1.playerShip.physicsObj.body.Rotation;
+            sd.x = player1.playerShip.physicsObj.body.Position.X;
+            sd.y = player1.playerShip.physicsObj.body.Position.Y;
+            srd.data = sd;
+            ServerToRemote tmpData = new ServerToRemote(srd);
+            OutputQueue.Instance.add(tmpData);
+            OutputQueue.Instance.process();
+            InputQueue.Instance.process(ref player1);
+
         }
+
+        
 
         private void clearData()
         {

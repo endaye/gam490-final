@@ -135,6 +135,10 @@
     <Compile Include="Manager\ManLink.cs" />
     <Compile Include="Manager\SpriteNode.cs" />
     <Compile Include="MessageDisplayComponent.cs" />
+    <Compile Include="Network\InputQueue.cs" />
+    <Compile Include="Network\OutputQueue.cs" />
+    <Compile Include="Network\RemoteToServer.cs" />
+    <Compile Include="Network\ServerToRemote.cs" />
     <Compile Include="PhysicManager\PhysicsMan.cs" />
     <Compile Include="PhysicManager\PhysicsObj.cs" />
     <Compile Include="PlayerManager\Player.cs" />

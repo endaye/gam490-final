@@ -10,7 +10,14 @@ using OmegaRace;
 
 namespace CollisionManager
 {
-    
+    public struct ShipData
+    {
+        public float x;
+        public float y;
+        public float rot;
+        //public int gamerIndex;
+        
+    }
 
 
     class Ship: GameObject
@@ -41,6 +48,16 @@ namespace CollisionManager
             base.Update();
         }
 
+        public void Update(ShipData shipData)
+        {
+            Vector2 velocity = physicsObj.body.GetLinearVelocity();
+            if (velocity.Length() > MaxSpeed)
+                physicsObj.body.SetLinearVelocity((MaxSpeed / velocity.Length() * velocity));
+
+            //base.Update();
+            pushPhysics(shipData.rot, new Vector2(shipData.x, shipData.y));
+        }
+       
         public override void Accept(GameObject other, Vector2 _point)
         {
             other.VisitShip(this, _point);
