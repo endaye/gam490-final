@@ -165,10 +165,10 @@ namespace OmegaRace
 
             Data.Instance().createData();
 
-            state = gameState.game;
+            state = gameState.lobby;
 
-            player1 = PlayerManager.Instance().getPlayer(PlayerID.one);
-            player2 = PlayerManager.Instance().getPlayer(PlayerID.two);
+            //player1 = PlayerManager.Instance().getPlayer(PlayerID.one);
+            //player2 = PlayerManager.Instance().getPlayer(PlayerID.two);
 
             // For screen font
             spriteBatch = new SpriteBatch(GraphicsDevice);
@@ -239,6 +239,7 @@ namespace OmegaRace
                     // Join an existing session?
                     JoinSession();
                 }
+                state = gameState.game;
             }
         }
 
@@ -279,7 +280,6 @@ namespace OmegaRace
                     networkSession = NetworkSession.Join(availableSessions[0]);
 
                     HookSessionEvents();
-                    state = gameState.game;
                 }
             }
             catch (Exception e)
@@ -301,13 +301,20 @@ namespace OmegaRace
         void GamerJoinedEventHandler(object sender, GamerJoinedEventArgs e)
         {
             int gamerIndex = networkSession.AllGamers.IndexOf(e.Gamer);
-            
+
+            // Register the new player:
+            Debug.WriteLine("--> Gamer join: {0} \n", gamerIndex);
+            // Magic stuff here: needed for queue
+            //InputQueue.[gamerIndex] = e.Gamer.Tag as Bird;
+
             if (e.Gamer.IsHost)
             {
+                player1 = PlayerManager.Instance().getPlayer(PlayerID.one);
                 playerCtrl = player1;
             }
             else
             {
+                player2 = PlayerManager.Instance().getPlayer(PlayerID.two);
                 playerCtrl = player2;
             }
         }
@@ -327,31 +334,22 @@ namespace OmegaRace
         void UpdateNetworkSession(GameTime gameTime)
         {
             LocalNetworkGamer localGamer = null;
-            LocalNetworkGamer server = null;
 
             // Read inputs for locally controlled tanks, and send them to the server.
             foreach (LocalNetworkGamer gamer in networkSession.LocalGamers)
             {
                 localGamer = gamer;
                 UpdateLocalGamer(gamer, gameTime);
-
-                // find server;
-                if (gamer.IsHost)
-                {
-                    server = gamer;
-                }
             }
 
             // If we are the server, update all the tanks and transmit
             // their latest positions back out over the network.
-            if (networkSession.IsHost)
+            if (state == gameState.game && networkSession.IsHost)
             {
                 UpdateServer();
             }
 
-            // Push data to the network
-            outQueue.pushToNetwork(localGamer);
-
+            
             // Get data from the network
             inQueue.pullFromNetwork(localGamer);
 
@@ -368,15 +366,23 @@ namespace OmegaRace
                 inQueue.pullFromNetwork(gamer);
                 inQueue.process(gamer);
             }
+
+            // Push data to the network
+            outQueue.pushToNetwork(localGamer);
+
         }
 
         void UpdateLocalGamer(LocalNetworkGamer gamer, GameTime gameTime)
         {
+
             if (state == gameState.game)
             {
+
                 world.Step((float)gameTime.ElapsedGameTime.TotalSeconds, 5, 8);
 
                 checkInput();
+
+                
 
                 PhysicsMan.Instance().Update();
 
@@ -395,14 +401,19 @@ namespace OmegaRace
         // tank position data to everyone in the session.
         void UpdateServer()
         {
-            ShipData_SR qShipSR1 = player1.playerShip.getShipSR();
-            ShipData_SR qShipSR2 = player2.playerShip.getShipSR();
-            qShipSR1.playerId = player1.id;
-            qShipSR2.playerId = player2.id;
-            outQueue.add(qShipSR1);
-            outQueue.add(qShipSR2);
-
-
+            if (player1 != null)
+            {
+                ShipData_SR qShipSR1 = player1.playerShip.getShipSR();
+                qShipSR1.playerId = player1.id;
+                outQueue.add(qShipSR1);
+            }
+            if (player2 != null)
+            {
+                ShipData_SR qShipSR2 = player2.playerShip.getShipSR();
+                qShipSR2.playerId = player2.id;
+                outQueue.add(qShipSR2);
+            }
+            
             //// Send the combined data for all tanks to everyone in the session.
             //LocalNetworkGamer server = (LocalNetworkGamer)networkSession.Host;
 
@@ -544,6 +555,8 @@ namespace OmegaRace
 
             }
 
+            #region Useless input
+            /*
             if ((oldState.IsKeyDown(Keys.X) && newState.IsKeyUp(Keys.X)) || (P1oldPadState.IsButtonDown(Buttons.A) && P1newPadState.IsButtonUp(Buttons.A)))
             {
                 if (player1.state == PlayerState.alive && player1.missileAvailable())
@@ -602,8 +615,8 @@ namespace OmegaRace
 
 
             else { }
-
-
+            */
+            #endregion
 
             P1oldPadState = P1newPadState;
             P2oldPadState = P2newPadState;
@@ -616,11 +629,7 @@ namespace OmegaRace
                 qShipRS.rotation = rot;
                 qShipRS.impulse = imp;
                 outQueue.add(qShipRS);
-                
             }
-
-            //outQueue.pushToNetwork(null, null);
-
         }
 
         /// Handles input.
