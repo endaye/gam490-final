@@ -12,8 +12,8 @@ namespace CollisionManager
 
     public enum PlayerID
     {
-        one,
-        two
+        one = 1,
+        two = 2
     }
 
     public enum PlayerState

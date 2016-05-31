@@ -100,7 +100,7 @@ namespace OmegaRace
                         ShipData_RS qShipRS = (ShipData_RS)qH.data;
 
                         Debug.WriteLine("Send -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}->{3}, Player {4}", 
-                            qH.inSeqNum, qH.outSeqNum, qH.type, qShipRS.GetType(), qShipRS.playerId.ToString());
+                            qH.inSeqNum, qH.outSeqNum, qH.type, qShipRS.GetType(), qShipRS.playerId);
                         
                         // Always push to network (wether it's local or external)
                         // Write the tank state into a network packet.
@@ -120,14 +120,14 @@ namespace OmegaRace
                         // Read the correct type of data
                         ShipData_SR qShipSR = (ShipData_SR)qH.data;
                         Debug.WriteLine("Send -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}->{3}, Player {4}", 
-                            qH.inSeqNum, qH.outSeqNum, qH.type, qShipSR.GetType(), qShipSR.playerId.ToString());
+                            qH.inSeqNum, qH.outSeqNum, qH.type, qShipSR.GetType(), qShipSR.playerId);
                         
                         // Always push to network (wether it's local or external)
                         // Write the tank state into a network packet.
                         packetWriter.Write(qH.inSeqNum);
                         packetWriter.Write(qH.outSeqNum);
                         packetWriter.Write((int)qH.type);
-                        packetWriter.Write(qShipSR.playerId.ToString());
+                        packetWriter.Write((int)qShipSR.playerId);
                         packetWriter.Write(qShipSR.x);
                         packetWriter.Write(qShipSR.y);
                         packetWriter.Write(qShipSR.rot);

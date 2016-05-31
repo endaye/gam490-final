@@ -44,14 +44,11 @@ namespace CollisionManager
 
         }
 
-        public ShipData_SR getShipSR()
+        public void getShipSR(ref ShipData_SR qShipSR)
         {
-            ShipData_SR qShipSR = new ShipData_SR();
-            qShipSR.playerId = PlayerID.one;
             qShipSR.x = this.physicsObj.body.Position.X;
             qShipSR.y = this.physicsObj.body.Position.Y;
             qShipSR.rot = this.physicsObj.body.Rotation;
-            return qShipSR;
         }
 
         public override void Update()
@@ -69,7 +66,6 @@ namespace CollisionManager
             Vector2 direction = new Vector2((float)(Math.Cos(this.physicsObj.body.GetAngle())), (float)(Math.Sin(this.physicsObj.body.GetAngle())));
             direction.Normalize();
             direction *= MaxSpeed;
-            //direction *= Game1.shipSpeed;
             this.physicsObj.body.ApplyLinearImpulse(direction, this.physicsObj.body.GetWorldCenter());
 
             Vector2 velocity = physicsObj.body.GetLinearVelocity();

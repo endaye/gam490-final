@@ -76,7 +76,7 @@ namespace OmegaRace
                 {
                     case QueueType.SHIP_RS:
                         ShipData_RS qShipRS;
-                        qShipRS.playerId = (CollisionManager.PlayerID)packetReader.ReadUInt32();
+                        qShipRS.playerId = (CollisionManager.PlayerID)packetReader.ReadInt32();
                         qShipRS.rotation = packetReader.ReadSingle();
                         qShipRS.impulse = packetReader.ReadSingle();
                         qH.data = qShipRS;
@@ -85,7 +85,7 @@ namespace OmegaRace
 
                     case QueueType.SHIP_SR:
                         ShipData_SR qShipSR;
-                        qShipSR.playerId = (CollisionManager.PlayerID)packetReader.ReadUInt32();
+                        qShipSR.playerId = (CollisionManager.PlayerID)packetReader.ReadInt32();
                         qShipSR.x = packetReader.ReadSingle();
                         qShipSR.y = packetReader.ReadSingle();
                         qShipSR.rot = packetReader.ReadSingle();
@@ -120,17 +120,20 @@ namespace OmegaRace
                             player = PlayerManager.Instance().getPlayer(qShipRS.playerId);
                             player.playerShip.Update(qShipRS);
                             Debug.WriteLine("Recv -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}->{3}, Player {4}",
-                                qH.inSeqNum, qH.outSeqNum, qH.type, qShipRS.GetType(), qShipRS.playerId.ToString());
+                                qH.inSeqNum, qH.outSeqNum, qH.type, qShipRS.GetType(), qShipRS.playerId);
                         }
                        
                         break;
                     case QueueType.SHIP_SR:
                         // Read the correct type of data
                         ShipData_SR qShipSR = (ShipData_SR)qH.data;
+                        
                         player = PlayerManager.Instance().getPlayer(qShipSR.playerId);
                         player.playerShip.Update(qShipSR);
+
+                        //Debug.WriteLine("PlayerID {0}",qShipSR.playerId.ToString());
                         Debug.WriteLine("Recv -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}->{3}, Player {4}",
-                            qH.inSeqNum, qH.outSeqNum, qH.type, qShipSR.GetType(), qShipSR.playerId.ToString());
+                            qH.inSeqNum, qH.outSeqNum, qH.type, qShipSR.GetType(), qShipSR.playerId);
                         break;
                     default:
                         break;
