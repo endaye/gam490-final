@@ -10,13 +10,13 @@ using OmegaRace;
 namespace CollisionManager
 {
 
-    enum PlayerID
+    public enum PlayerID
     {
         one,
         two
     }
 
-    enum PlayerState
+    public enum PlayerState
     {
         alive,
         dead

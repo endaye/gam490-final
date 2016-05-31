@@ -59,7 +59,8 @@ namespace OmegaRace
         const int maxGamers = 16;
         const int maxLocalGamers = 4;
 
-        NetworkSession networkSession;
+        // Network Session
+        public static NetworkSession networkSession;
 
         // Singleton I/O queues
         InputQueue inQueue = InputQueue.Instance;
@@ -104,9 +105,8 @@ namespace OmegaRace
         Player player2;
         Player playerCtrl;
 
-
         // Max ship speed
-        int shipSpeed;
+        public const int shipSpeed = 200;
 
         public Game1()
         {
@@ -123,8 +123,6 @@ namespace OmegaRace
 
             world = new World(new Vector2(0, 0), false);
 
-            shipSpeed = 200;
-
             Game = this;
 
             // added this line for login Live accout
@@ -135,12 +133,10 @@ namespace OmegaRace
 
         #region Initalization
 
-        /// <summary>
-        /// Allows the game to perform any initialization it needs to before starting to run.
-        /// This is where it can query for any required services and load any non-graphic
-        /// related content.  Calling base.Initialize will enumerate through any components
-        /// and initialize them as well.
-        /// </summary>
+        // Allows the game to perform any initialization it needs to before starting to run.
+        // This is where it can query for any required services and load any non-graphic
+        // related content.  Calling base.Initialize will enumerate through any components
+        // and initialize them as well.
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
@@ -153,10 +149,9 @@ namespace OmegaRace
             base.Initialize();
         }
 
-        /// <summary>
-        /// LoadContent will be called once per game and is the place to load
-        /// all of your content.
-        /// </summary>
+    
+        // LoadContent will be called once per game and is the place to load
+        // all of your content.
         protected override void LoadContent()
         {
             // TODO: use this.Content to load your game content here
@@ -295,17 +290,9 @@ namespace OmegaRace
 
         void HookSessionEvents()
         {
-            //Debug.WriteLine("NetworkSession.MaxPreviousGamers: {0}", NetworkSession.MaxPreviousGamers);
+            Debug.WriteLine("NetworkSession.MaxPreviousGamers: {0}", NetworkSession.MaxPreviousGamers);
             networkSession.GamerJoined += GamerJoinedEventHandler;
             networkSession.SessionEnded += SessionEndedEventHandler;
-            //if (NetworkSession.MaxPreviousGamers == 1)
-            //{
-            //    state = gameState.ready;
-            //}
-            //else if (NetworkSession.MaxPreviousGamers == 2)
-            //{
-            //    state = gameState.game;
-            //}
 
         }
 
@@ -315,7 +302,6 @@ namespace OmegaRace
         {
             int gamerIndex = networkSession.AllGamers.IndexOf(e.Gamer);
             
-            //e.Gamer.Tag = new Tank(gamerIndex, Content, screenWidth, screenHeight);
             if (e.Gamer.IsHost)
             {
                 playerCtrl = player1;
@@ -324,9 +310,6 @@ namespace OmegaRace
             {
                 playerCtrl = player2;
             }
-            
-            //player1 = PlayerManager.Instance().getPlayer(PlayerID.one);
-            //player2 = PlayerManager.Instance().getPlayer(PlayerID.two);
         }
 
         // Event handler notifies us when the network session has ended.
@@ -343,18 +326,34 @@ namespace OmegaRace
         // around and synchronizing their state over the network.
         void UpdateNetworkSession(GameTime gameTime)
         {
+            LocalNetworkGamer localGamer = null;
+            LocalNetworkGamer server = null;
+
             // Read inputs for locally controlled tanks, and send them to the server.
             foreach (LocalNetworkGamer gamer in networkSession.LocalGamers)
             {
+                localGamer = gamer;
                 UpdateLocalGamer(gamer, gameTime);
+
+                // find server;
+                if (gamer.IsHost)
+                {
+                    server = gamer;
+                }
             }
 
             // If we are the server, update all the tanks and transmit
             // their latest positions back out over the network.
             if (networkSession.IsHost)
             {
-                // UpdateServer();
+                UpdateServer();
             }
+
+            // Push data to the network
+            outQueue.pushToNetwork(localGamer);
+
+            // Get data from the network
+            inQueue.pullFromNetwork(localGamer);
 
             // Pump the underlying session object.
             networkSession.Update();
@@ -366,14 +365,8 @@ namespace OmegaRace
             // Read any incoming network packets.
             foreach (LocalNetworkGamer gamer in networkSession.LocalGamers)
             {
-                if (gamer.IsHost)
-                {
-                    //ServerReadInputFromClients(gamer);
-                }
-                else
-                {
-                    //ClientReadGameStateFromServer(gamer);
-                }
+                inQueue.pullFromNetwork(gamer);
+                inQueue.process(gamer);
             }
         }
 
@@ -381,7 +374,6 @@ namespace OmegaRace
         {
             if (state == gameState.game)
             {
-
                 world.Step((float)gameTime.ElapsedGameTime.TotalSeconds, 5, 8);
 
                 checkInput();
@@ -394,9 +386,33 @@ namespace OmegaRace
 
                 Timer.Process(gameTime);
             }
-
             Game1.Camera.Update(gameTime);
         }
+
+        // This method only runs on the server. It calls Update on all the
+        // tank instances, both local and remote, using inputs that have
+        // been received over the network. It then sends the resulting
+        // tank position data to everyone in the session.
+        void UpdateServer()
+        {
+            ShipData_SR qShipSR1 = player1.playerShip.getShipSR();
+            ShipData_SR qShipSR2 = player2.playerShip.getShipSR();
+            qShipSR1.playerId = player1.id;
+            qShipSR2.playerId = player2.id;
+            outQueue.add(qShipSR1);
+            outQueue.add(qShipSR2);
+
+
+            //// Send the combined data for all tanks to everyone in the session.
+            //LocalNetworkGamer server = (LocalNetworkGamer)networkSession.Host;
+
+            //// Loop over all the players in the session, not just the local ones!
+            //foreach (NetworkGamer gamer in networkSession.AllGamers)
+            //{
+            //    outQueue.pushToNetwork((LocalNetworkGamer)gamer);
+            //}
+        }
+
 
         #endregion
 
@@ -483,33 +499,48 @@ namespace OmegaRace
             P2newPadState = GamePad.GetState(PlayerIndex.Two);
             newPadState = P1newPadState;
 
-            
+            /*
+            // Read the gamepad.
+            GamePadState gamePad = GamePad.GetState(PlayerIndex.One);
+
+            Vector2 ShipInput = gamePad.ThumbSticks.Left;
+
+            // Normalize the input vectors.
+            if (ShipInput.Length() > 1)
+                ShipInput.Normalize();
+
+            player1.playerShip.physicsObj.body.Position += ShipInput;
+            */
+            float rot = 0.0f;
+            float imp = 0.0f;
 
             if (oldState.IsKeyDown(Keys.D) || P1oldPadState.IsButtonDown(Buttons.DPadRight))
             {
-
-                playerCtrl.playerShip.physicsObj.body.Rotation += 0.1f;
-                //RemoteToServer data = new RemoteToServer(ActionType.SHIP_ROTATION_RIGHT, 0.1f);
+                rot += 0.1f;
+                //playerCtrl.playerShip.physicsObj.body.Rotation += 0.1f;
+                //RemoteToServer data = new RemoteToServer(playerCtrl.id, ActionType.SHIP_ROTATION_RIGHT, 0.1f);
                 //OutputQueue.Instance.add(data);
             }
 
             if (oldState.IsKeyDown(Keys.A) || P1oldPadState.IsButtonDown(Buttons.DPadLeft))
             {
+                rot -= 0.1f;
                 //player1.playerShip.physicsObj.body.Rotation -= 0.1f;
-                RemoteToServer data = new RemoteToServer(ActionType.SHIP_ROTATION_LEFT, 0.1f);
-                OutputQueue.Instance.add(data);
+                //RemoteToServer data = new RemoteToServer(playerCtrl.id, ActionType.SHIP_ROTATION_LEFT, 0.1f);
+                //OutputQueue.Instance.add(data);
             }
 
             if (oldState.IsKeyDown(Keys.W) || P1oldPadState.IsButtonDown(Buttons.DPadUp) || P1newPadState.ThumbSticks.Left.Y > 0.3f)
             {
+                imp = 0.1f;
                 //Ship Player1Ship = player1.playerShip;
                 //Vector2 direction = new Vector2((float)(Math.Cos(Player1Ship.physicsObj.body.GetAngle())), (float)(Math.Sin(Player1Ship.physicsObj.body.GetAngle())));
                 //direction.Normalize();
                 //direction *= shipSpeed;
                 //Player1Ship.physicsObj.body.ApplyLinearImpulse(direction, Player1Ship.physicsObj.body.GetWorldCenter());
-
-                RemoteToServer data = new RemoteToServer(ActionType.SHIP_IMPULSE, shipSpeed);
-                OutputQueue.Instance.add(data);
+                
+                //RemoteToServer data = new RemoteToServer(playerCtrl.id, ActionType.SHIP_IMPULSE, shipSpeed);
+                //OutputQueue.Instance.add(data);
 
             }
 
@@ -578,17 +609,17 @@ namespace OmegaRace
             P2oldPadState = P2newPadState;
             oldState = newState;
 
-            ServerToRemoteData srd = new ServerToRemoteData();
-            srd.type = ObjectType.SHIP;
-            ShipData sd = new ShipData();
-            sd.rot = player1.playerShip.physicsObj.body.Rotation;
-            sd.x = player1.playerShip.physicsObj.body.Position.X;
-            sd.y = player1.playerShip.physicsObj.body.Position.Y;
-            srd.data = sd;
-            ServerToRemote tmpData = new ServerToRemote(srd);
-            OutputQueue.Instance.add(tmpData);
-            OutputQueue.Instance.process();
-            InputQueue.Instance.process(ref player1);
+            if (rot != 0.0f || imp != 0.0f)
+            {
+                ShipData_RS qShipRS = new ShipData_RS();
+                qShipRS.playerId = playerCtrl.id;
+                qShipRS.rotation = rot;
+                qShipRS.impulse = imp;
+                outQueue.add(qShipRS);
+                
+            }
+
+            //outQueue.pushToNetwork(null, null);
 
         }
 
