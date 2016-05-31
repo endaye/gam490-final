@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Diagnostics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
@@ -8,6 +9,7 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+using Microsoft.Xna.Framework.Net;
 using CollisionManager;
 using SpriteAnimation;
 using Box2D.XNA;
@@ -16,10 +18,11 @@ namespace OmegaRace
 {
     public enum gameState
     {
-        ready, // Flashes Ready? until the timer is up
-        game, // The main game mode
+        lobby,  // Lobby and waiting for 2 players connection
+        ready,  // Flashes Ready? until the timer is up
+        game,   // The main game mode
         pause,
-        winner // Displays the winner
+        winner  // Displays the winner
     };
 
     /// <summary>
@@ -27,6 +30,8 @@ namespace OmegaRace
     /// </summary>
     public class Game1 : Microsoft.Xna.Framework.Game
     {
+        #region Fields
+
         GraphicsDeviceManager graphics;
         public GraphicsDeviceManager Graphics
         {
@@ -46,17 +51,39 @@ namespace OmegaRace
             get { return camera; }
         }
 
+        // Screen size
+        const int screenWidth = 800;
+        const int screenHeight = 500;
+
+        // Network Gamers
+        const int maxGamers = 16;
+        const int maxLocalGamers = 4;
+
+        NetworkSession networkSession;
+
+        // Singleton I/O queues
+        InputQueue inQueue = InputQueue.Instance;
+        OutputQueue outQueue = OutputQueue.Instance;
+
+        // Backup, may be useless
+        SpriteBatch spriteBatch;
+        SpriteFont font;
+
+        // Error message
+        string errorMessage;
 
         // Keyboard and Xbox Controller states
         KeyboardState oldState;
         KeyboardState newState;
+
+        GamePadState oldPadState;
+        GamePadState newPadState;
 
         GamePadState P1oldPadState;
         GamePadState P1newPadState;
 
         GamePadState P2oldPadState;
         GamePadState P2newPadState;
-
 
         // For flipping game states
         public static gameState state;
@@ -80,26 +107,32 @@ namespace OmegaRace
         // Max ship speed
         int shipSpeed;
 
-
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
 
-            graphics.PreferredBackBufferHeight = 500;
-            graphics.PreferredBackBufferWidth = 800;
+            graphics.PreferredBackBufferHeight = screenHeight;
+            graphics.PreferredBackBufferWidth = screenWidth;
 
-            gameScreenSize = new Rectangle(0, 0, 800, 500);
+            gameScreenSize = new Rectangle(0, 0, screenWidth, screenHeight);
 
-            state = gameState.ready;
+            state = gameState.lobby;
 
             world = new World(new Vector2(0, 0), false);
 
             shipSpeed = 200;
 
             Game = this;
+
+            // added this line for login Live accout
+            Components.Add(new GamerServicesComponent(this));
         }
+
+        #endregion
+
+        #region Initalization
 
         /// <summary>
         /// Allows the game to perform any initialization it needs to before starting to run.
@@ -141,7 +174,9 @@ namespace OmegaRace
             player1 = PlayerManager.Instance().getPlayer(PlayerID.one);
             player2 = PlayerManager.Instance().getPlayer(PlayerID.two);
 
-
+            // For screen font
+            spriteBatch = new SpriteBatch(GraphicsDevice);
+            font = Content.Load<SpriteFont>("SpriteFont1");
 
 
         }
@@ -153,7 +188,12 @@ namespace OmegaRace
         protected override void UnloadContent()
         {
             // TODO: Unload any non ContentManager content here
+            // Useless here
         }
+
+        #endregion
+
+        #region Update
 
         /// <summary>
         /// Allows the game to run logic such as updating the world,
@@ -163,14 +203,176 @@ namespace OmegaRace
         protected override void Update(GameTime gameTime)
         {
             // TODO: Add your update logic here
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
-                this.Exit();
+            HandleInput();
 
             GraphicsDevice.Clear(Color.Black);
 
+            if (networkSession == null)
+            {
+                // If we are not in a network session, update the
+                // menu screen that will let us create or join one.
+                UpdateMenuScreen();
+            }
+            else
+            {
+                // If we are in a network session, update it.
+                UpdateNetworkSession(gameTime);
+            }
 
             base.Update(gameTime);
+        }
 
+        // Menu screen provides options to create or join network sessions.
+        void UpdateMenuScreen()
+        {
+            if (IsActive)
+            {
+                if (Gamer.SignedInGamers.Count == 0)
+                {
+                    // If there are no profiles signed in, we cannot proceed.
+                    // Show the Guide so the user can sign in.
+                    Guide.ShowSignIn(maxLocalGamers, false);
+                }
+                else if (IsPressed(Keys.A, Buttons.A))
+                {
+                    // Create a new session?
+                    CreateSession();
+                }
+                else if (IsPressed(Keys.B, Buttons.B))
+                {
+                    // Join an existing session?
+                    JoinSession();
+                }
+            }
+        }
+
+        // Starts hosting a new network session.
+        void CreateSession()
+        {
+            DrawMessage("Creating session...");
+            try
+            {
+                networkSession = NetworkSession.Create(NetworkSessionType.SystemLink, maxLocalGamers, maxGamers);
+                //HookSessionEvents();
+            }
+            catch (Exception e)
+            {
+                errorMessage = e.Message;
+            }
+        }
+
+        // Joins an existing network session.
+        void JoinSession()
+        {
+            DrawMessage("Joining session...");
+
+            try
+            {
+                // Search for sessions.
+                using (AvailableNetworkSessionCollection availableSessions =
+                            NetworkSession.Find(NetworkSessionType.SystemLink,
+                                                maxLocalGamers, null))
+                {
+                    if (availableSessions.Count == 0)
+                    {
+                        errorMessage = "No network sessions found.";
+                        return;
+                    }
+
+                    // Join the first session we found.
+                    networkSession = NetworkSession.Join(availableSessions[0]);
+
+                    //HookSessionEvents();
+                    state = gameState.game;
+                }
+            }
+            catch (Exception e)
+            {
+                errorMessage = e.Message;
+            }
+        }
+
+        void HookSessionEvents()
+        {
+            Debug.WriteLine("NetworkSession.MaxPreviousGamers: {0}", NetworkSession.MaxPreviousGamers);
+            if (NetworkSession.MaxPreviousGamers == 1)
+            {
+                state = gameState.ready;
+            }
+            else if (NetworkSession.MaxPreviousGamers == 2)
+            {
+                state = gameState.game;
+            }
+
+        }
+
+        /// <summary>
+        /// This event handler will be called whenever a new gamer joins the session.
+        /// We use it to allocate a Tank object, and associate it with the new gamer.
+        /// </summary>
+        void GamerJoinedEventHandler(object sender, GamerJoinedEventArgs e)
+        {
+            int gamerIndex = networkSession.AllGamers.IndexOf(e.Gamer);
+
+            //e.Gamer.Tag = new Tank(gamerIndex, Content, screenWidth, screenHeight);
+            //e.Gamer.Tag = 
+            //player1 = PlayerManager.Instance().getPlayer(PlayerID.one);
+            //player2 = PlayerManager.Instance().getPlayer(PlayerID.two);
+        }
+
+
+        /// <summary>
+        /// Event handler notifies us when the network session has ended.
+        /// </summary>
+        void SessionEndedEventHandler(object sender, NetworkSessionEndedEventArgs e)
+        {
+            errorMessage = e.EndReason.ToString();
+
+            networkSession.Dispose();
+            networkSession = null;
+        }
+
+
+        // Updates the state of the network session, moving the tanks
+        // around and synchronizing their state over the network.
+        void UpdateNetworkSession(GameTime gameTime)
+        {
+            // Read inputs for locally controlled tanks, and send them to the server.
+            foreach (LocalNetworkGamer gamer in networkSession.LocalGamers)
+            {
+                UpdateLocalGamer(gamer, gameTime);
+            }
+
+            // If we are the server, update all the tanks and transmit
+            // their latest positions back out over the network.
+            if (networkSession.IsHost)
+            {
+                // UpdateServer();
+            }
+
+            // Pump the underlying session object.
+            networkSession.Update();
+
+            // Make sure the session has not ended.
+            if (networkSession == null)
+                return;
+
+            // Read any incoming network packets.
+            foreach (LocalNetworkGamer gamer in networkSession.LocalGamers)
+            {
+                if (gamer.IsHost)
+                {
+                    //ServerReadInputFromClients(gamer);
+                }
+                else
+                {
+                    //ClientReadGameStateFromServer(gamer);
+                }
+            }
+        }
+
+        void UpdateLocalGamer(LocalNetworkGamer gamer, GameTime gameTime)
+        {
             if (state == gameState.game)
             {
 
@@ -190,6 +392,10 @@ namespace OmegaRace
             Game1.Camera.Update(gameTime);
         }
 
+        #endregion
+
+        #region Draw
+
         /// <summary>
         /// This is called when the game should draw itself.
         /// </summary>
@@ -197,37 +403,87 @@ namespace OmegaRace
         protected override void Draw(GameTime gameTime)
         {
 
-            if (state == gameState.game)
-            {
-                SpriteBatchManager.Instance().process();
-            }
+            // GraphicsDevice.Clear(Color.CornflowerBlue);
 
+            if (networkSession == null)
+            {
+                // If we are not in a network session, draw the
+                // menu screen that will let us create or join one.
+                DrawMenuScreen();
+            }
+            else
+            {
+                // If we are in a network session, draw it.
+                DrawNetworkSession();
+            }
 
             base.Draw(gameTime);
         }
 
-        public void GameOver()
+        // Draws the startup screen used to create and join network sessions.
+        void DrawMenuScreen()
         {
-            state = gameState.winner;
+            string message = string.Empty;
 
+            if (!string.IsNullOrEmpty(errorMessage))
+                message += "Error:\n" + errorMessage.Replace(". ", ".\n") + "\n\n";
 
-            resetData();
+            message += "A = create session\n" +
+                       "B = join session";
+
+            spriteBatch.Begin();
+
+            spriteBatch.DrawString(font, message, new Vector2(161, 161), Color.Azure);
+            spriteBatch.DrawString(font, message, new Vector2(160, 160), Color.White);
+
+            spriteBatch.End();
         }
 
+        // Draws the state of an active network session.
+        void DrawNetworkSession()
+        {
+            if (state == gameState.game)
+            {
+                SpriteBatchManager.Instance().process();
+            }
+        }
+
+        // Helper draws notification messages before calling blocking network methods.
+        void DrawMessage(string message)
+        {
+            if (!BeginDraw())
+                return;
+
+            //GraphicsDevice.Clear(Color.CornflowerBlue);
+
+            spriteBatch.Begin();
+
+            spriteBatch.DrawString(font, message, new Vector2(161, 161), Color.Azure);
+            spriteBatch.DrawString(font, message, new Vector2(160, 160), Color.White);
+
+            spriteBatch.End();
+
+            EndDraw();
+        }
+
+        #endregion
+
+        #region Handle Input
 
         private void checkInput()
         {
             newState = Keyboard.GetState();
             P1newPadState = GamePad.GetState(PlayerIndex.One);
             P2newPadState = GamePad.GetState(PlayerIndex.Two);
+            newPadState = P1newPadState;
 
             if (oldState.IsKeyDown(Keys.D) || P1oldPadState.IsButtonDown(Buttons.DPadRight))
             {
-                 //player1.playerShip.physicsObj.body.Rotation += 0.1f;
+                //player1.playerShip.physicsObj.body.Rotation += 0.1f;
                 RemoteToServer data = new RemoteToServer(ActionType.SHIP_ROTATION_RIGHT, 0.1f);
                 OutputQueue.Instance.add(data);
             }
-            
+
             if (oldState.IsKeyDown(Keys.A) || P1oldPadState.IsButtonDown(Buttons.DPadLeft))
             {
                 //player1.playerShip.physicsObj.body.Rotation -= 0.1f;
@@ -242,7 +498,7 @@ namespace OmegaRace
                 //direction.Normalize();
                 //direction *= shipSpeed;
                 //Player1Ship.physicsObj.body.ApplyLinearImpulse(direction, Player1Ship.physicsObj.body.GetWorldCenter());
-                
+
                 RemoteToServer data = new RemoteToServer(ActionType.SHIP_IMPULSE, shipSpeed);
                 OutputQueue.Instance.add(data);
 
@@ -327,7 +583,38 @@ namespace OmegaRace
 
         }
 
-        
+        /// Handles input.
+        private void HandleInput()
+        {
+            newState = Keyboard.GetState();
+            P1newPadState = GamePad.GetState(PlayerIndex.One);
+            P2newPadState = GamePad.GetState(PlayerIndex.Two);
+            newPadState = P1newPadState;
+
+            // Check for exit.
+            if (IsActive && IsPressed(Keys.Escape, Buttons.Back))
+            {
+                Exit();
+            }
+        }
+
+        // Checks if the specified button is pressed on either keyboard or gamepad.
+        bool IsPressed(Keys key, Buttons button)
+        {
+            return (newState.IsKeyDown(key) || newPadState.IsButtonDown(button));
+        }
+
+        #endregion
+
+        #region Other
+
+        public void GameOver()
+        {
+            state = gameState.winner;
+
+
+            resetData();
+        }
 
         private void clearData()
         {
@@ -353,5 +640,7 @@ namespace OmegaRace
 
             state = gameState.game;
         }
+
+        #endregion
     }
 }
