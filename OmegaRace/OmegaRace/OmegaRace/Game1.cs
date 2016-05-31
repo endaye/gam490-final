@@ -102,6 +102,7 @@ namespace OmegaRace
         // Quick reference for Input 
         Player player1;
         Player player2;
+        Player playerCtrl;
 
 
         // Max ship speed
@@ -253,7 +254,7 @@ namespace OmegaRace
             try
             {
                 networkSession = NetworkSession.Create(NetworkSessionType.SystemLink, maxLocalGamers, maxGamers);
-                //HookSessionEvents();
+                HookSessionEvents();
             }
             catch (Exception e)
             {
@@ -282,7 +283,7 @@ namespace OmegaRace
                     // Join the first session we found.
                     networkSession = NetworkSession.Join(availableSessions[0]);
 
-                    //HookSessionEvents();
+                    HookSessionEvents();
                     state = gameState.game;
                 }
             }
@@ -294,36 +295,41 @@ namespace OmegaRace
 
         void HookSessionEvents()
         {
-            Debug.WriteLine("NetworkSession.MaxPreviousGamers: {0}", NetworkSession.MaxPreviousGamers);
-            if (NetworkSession.MaxPreviousGamers == 1)
-            {
-                state = gameState.ready;
-            }
-            else if (NetworkSession.MaxPreviousGamers == 2)
-            {
-                state = gameState.game;
-            }
+            //Debug.WriteLine("NetworkSession.MaxPreviousGamers: {0}", NetworkSession.MaxPreviousGamers);
+            networkSession.GamerJoined += GamerJoinedEventHandler;
+            networkSession.SessionEnded += SessionEndedEventHandler;
+            //if (NetworkSession.MaxPreviousGamers == 1)
+            //{
+            //    state = gameState.ready;
+            //}
+            //else if (NetworkSession.MaxPreviousGamers == 2)
+            //{
+            //    state = gameState.game;
+            //}
 
         }
 
-        /// <summary>
-        /// This event handler will be called whenever a new gamer joins the session.
-        /// We use it to allocate a Tank object, and associate it with the new gamer.
-        /// </summary>
+        // This event handler will be called whenever a new gamer joins the session.
+        // We use it to allocate a Tank object, and associate it with the new gamer.
         void GamerJoinedEventHandler(object sender, GamerJoinedEventArgs e)
         {
             int gamerIndex = networkSession.AllGamers.IndexOf(e.Gamer);
-
+            
             //e.Gamer.Tag = new Tank(gamerIndex, Content, screenWidth, screenHeight);
-            //e.Gamer.Tag = 
+            if (e.Gamer.IsHost)
+            {
+                playerCtrl = player1;
+            }
+            else
+            {
+                playerCtrl = player2;
+            }
+            
             //player1 = PlayerManager.Instance().getPlayer(PlayerID.one);
             //player2 = PlayerManager.Instance().getPlayer(PlayerID.two);
         }
 
-
-        /// <summary>
-        /// Event handler notifies us when the network session has ended.
-        /// </summary>
+        // Event handler notifies us when the network session has ended.
         void SessionEndedEventHandler(object sender, NetworkSessionEndedEventArgs e)
         {
             errorMessage = e.EndReason.ToString();
@@ -477,11 +483,14 @@ namespace OmegaRace
             P2newPadState = GamePad.GetState(PlayerIndex.Two);
             newPadState = P1newPadState;
 
+            
+
             if (oldState.IsKeyDown(Keys.D) || P1oldPadState.IsButtonDown(Buttons.DPadRight))
             {
-                //player1.playerShip.physicsObj.body.Rotation += 0.1f;
-                RemoteToServer data = new RemoteToServer(ActionType.SHIP_ROTATION_RIGHT, 0.1f);
-                OutputQueue.Instance.add(data);
+
+                playerCtrl.playerShip.physicsObj.body.Rotation += 0.1f;
+                //RemoteToServer data = new RemoteToServer(ActionType.SHIP_ROTATION_RIGHT, 0.1f);
+                //OutputQueue.Instance.add(data);
             }
 
             if (oldState.IsKeyDown(Keys.A) || P1oldPadState.IsButtonDown(Buttons.DPadLeft))
