@@ -10,6 +10,19 @@ using OmegaRace;
 
 namespace CollisionManager
 {
+    public enum GameObjSRState
+    {
+        HIT_SHIP_WALL = 0,        // ship hits wall
+        HIT_SHIP_MISSILE = 1,
+        HIT_MISSILE_WALL = 2,
+        OTHER,
+    }
+
+    public struct GameObjData_SR
+    {
+        public int gameObjId;
+        public GameObjSRState state;     
+    }
 
     enum GameObjState
     {
@@ -35,8 +48,15 @@ namespace CollisionManager
         public float rotation;
         public Vector2 location;
 
+        public OutputQueue outQueue = OutputQueue.Instance;
+
+        public static int globalGameObjId = 0;
+
+        public int gameObjId;
+
         public GameObject()
         {
+            gameObjId = globalGameObjId++;
             rotation = 0;
             location = new Vector2();
             this.CollideAvailable = true;

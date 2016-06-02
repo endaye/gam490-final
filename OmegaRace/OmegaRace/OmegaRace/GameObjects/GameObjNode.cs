@@ -6,8 +6,6 @@ using CollisionManager;
 
 namespace OmegaRace
 {
-
-
     class GameObjNode : ManLink
     {
         public GameObject gameObj;

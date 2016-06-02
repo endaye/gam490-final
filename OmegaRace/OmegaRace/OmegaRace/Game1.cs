@@ -408,16 +408,6 @@ namespace OmegaRace
                 outQueue.add(qShipSR2);
             }
 
-            
-            
-            //// Send the combined data for all tanks to everyone in the session.
-            //LocalNetworkGamer server = (LocalNetworkGamer)networkSession.Host;
-
-            //// Loop over all the players in the session, not just the local ones!
-            //foreach (NetworkGamer gamer in networkSession.AllGamers)
-            //{
-            //    outQueue.pushToNetwork((LocalNetworkGamer)gamer);
-            //}
         }
 
 
@@ -518,6 +508,9 @@ namespace OmegaRace
 
             player1.playerShip.physicsObj.body.Position += ShipInput;
             */
+
+            #region Ship moving
+
             float rot = 0.0f;
             float imp = 0.0f;
 
@@ -536,8 +529,6 @@ namespace OmegaRace
                 imp = 0.1f;
             }
 
-            #region Useless input
-            /*
             if ((oldState.IsKeyDown(Keys.X) && newState.IsKeyUp(Keys.X)) || (P1oldPadState.IsButtonDown(Buttons.A) && P1newPadState.IsButtonUp(Buttons.A)))
             {
                 if (player1.state == PlayerState.alive && player1.missileAvailable())
@@ -553,6 +544,12 @@ namespace OmegaRace
                     GameObjManager.Instance().createBomb(PlayerID.one);
 
             }
+
+            #endregion
+
+            #region Useless input
+            /*
+           
 
             if (oldState.IsKeyDown(Keys.Right) || P2oldPadState.IsButtonDown(Buttons.DPadRight))
             {

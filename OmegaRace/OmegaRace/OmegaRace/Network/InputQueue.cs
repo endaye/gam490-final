@@ -93,6 +93,14 @@ namespace OmegaRace
                         this.add(qH);
                         break;
 
+                    case QueueType.GAMEOBJ_SR:
+                        GameObjData_SR qGameSR;
+                        qGameSR.gameObjId = packetReader.ReadInt32();
+                        qGameSR.state = (CollisionManager.GameObjSRState)packetReader.ReadInt32();
+                        qH.data = qGameSR;
+                        this.add(qH);
+                        break;
+
                     default:
                         break;
                 }
@@ -122,8 +130,8 @@ namespace OmegaRace
                             Debug.WriteLine("Recv -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}->{3}, Player {4}",
                                 qH.inSeqNum, qH.outSeqNum, qH.type, qShipRS.GetType(), qShipRS.playerId);
                         }
-                       
                         break;
+
                     case QueueType.SHIP_SR:
                         // Read the correct type of data
                         ShipData_SR qShipSR = (ShipData_SR)qH.data;
@@ -134,6 +142,13 @@ namespace OmegaRace
                         //Debug.WriteLine("PlayerID {0}",qShipSR.playerId.ToString());
                         Debug.WriteLine("Recv -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}->{3}, Player {4}",
                             qH.inSeqNum, qH.outSeqNum, qH.type, qShipSR.GetType(), qShipSR.playerId);
+                        break;
+
+                    case QueueType.GAMEOBJ_SR:
+                        GameObjData_SR qGameSR = (GameObjData_SR)qH.data;
+                        GameObjManager.Instance().RevieveFromeInQ(qGameSR);
+                        Debug.WriteLine("Recv -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}->{3}, GameObjID {4} #{5}",
+                            qH.inSeqNum, qH.outSeqNum, qH.type, qGameSR.GetType(), qGameSR.gameObjId, qGameSR.state);
                         break;
                     default:
                         break;

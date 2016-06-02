@@ -12,6 +12,7 @@ namespace OmegaRace
     {
         SHIP_RS,        // remote to server Ship action state
         SHIP_SR,        // server to remote Ship pos & rot
+        GAMEOBJ_SR,     // server to remote GameObj state
         OTHER,
     }
 
@@ -77,6 +78,10 @@ namespace OmegaRace
             {
                 outData.type = QueueType.SHIP_SR;
             } 
+            else if (_data.GetType().Equals(typeof(GameObjData_SR)))
+            {
+                outData.type = QueueType.GAMEOBJ_SR;
+            }
             else
             {
                 outData.type = QueueType.OTHER;
@@ -137,6 +142,18 @@ namespace OmegaRace
 
                         break;
 
+                    case QueueType.GAMEOBJ_SR:
+                        GameObjData_SR qGameSR = (GameObjData_SR)qH.data;
+                        Debug.WriteLine("Send -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}->{3}, GameObjID {4} #{5}",
+                            qH.inSeqNum, qH.outSeqNum, qH.type, qGameSR.GetType(), qGameSR.gameObjId, qGameSR.state);
+                        // Always push to network (wether it's local or external)
+                        // Write the tank state into a network packet.
+                        packetWriter.Write(qH.inSeqNum);
+                        packetWriter.Write(qH.outSeqNum);
+                        packetWriter.Write((int)qH.type);
+                        packetWriter.Write(qGameSR.gameObjId);
+                        packetWriter.Write((int)qGameSR.state);
+                        break;
                     default:
                         break;
                 }
