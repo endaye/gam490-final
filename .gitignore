@@ -91,3 +91,7 @@ OmegaRace/OmegaRace/OmegaRaceContent/obj
 *.suo
 *.cachefile
 XNA/Samples
+
+OmegaRace_Original/OmegaRace/OmegaRace/bin
+OmegaRace_Original/OmegaRace/OmegaRace/obj
+OmegaRace_Original/OmegaRace/OmegaRaceContent/obj

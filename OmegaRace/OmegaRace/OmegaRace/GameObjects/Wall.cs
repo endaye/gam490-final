@@ -59,10 +59,12 @@ namespace CollisionManager
             Vector2 pos = _point;
 
             GameObjManager.Instance().addExplosion(pos, m.spriteRef.color);
-            GameObjManager.Instance().remove(batchEnum.missiles, m);
+            // GameObjManager.Instance().remove(batchEnum.missiles, m);
+            m.Reset();
+
             playFenceHit();
 
-            PlayerManager.Instance().getPlayer(m.owner).increaseNumMissiles();
+            //PlayerManager.Instance().getPlayer(m.owner).increaseNumMissiles();
 
             hit();
         }

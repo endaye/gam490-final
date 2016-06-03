@@ -133,41 +133,6 @@ namespace OmegaRace
                 Message qH = _q.Dequeue();
                 Debug.WriteLine("Recv -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}", qH.inSeqNum, qH.outSeqNum, qH.type);
                 qH.execute();
-                //switch (qH.type)
-                //{
-                //    case QueueType.SHIP_RS:
-                //        if (localGamer.IsHost)
-                //        {
-                //            // Read the correct type of data
-                //            ShipMsg_RS qShipRS = (ShipMsg_RS)qH.data;
-                //            player = PlayerManager.Instance().getPlayer(qShipRS.playerId);
-                //            player.playerShip.Update(qShipRS);
-                //            Debug.WriteLine("Recv -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}->{3}, Player {4}, rot {5}, imp {6}",
-                //                qH.inSeqNum, qH.outSeqNum, qH.type, qShipRS.GetType(), qShipRS.playerId, qShipRS.rotation, qShipRS.impulse);
-                //        }
-                //        break;
-
-                //    case QueueType.Physics_SR:
-                //        // Read the correct type of data
-                //        ShipMsg_SR qShipSR = (ShipMsg_SR)qH.data;
-                //        player = PlayerManager.Instance().getPlayer(qShipSR.playerId);
-                //        player.playerShip.Update(qShipSR);
-
-                //        //Debug.WriteLine("PlayerID {0}",qShipSR.playerId.ToString());
-                //        Debug.WriteLine("Recv -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}->{3}, Player {4}, rot {5}, pos [{6}, {7}]",
-                //            qH.inSeqNum, qH.outSeqNum, qH.type, qShipSR.GetType(), qShipSR.playerId, qShipSR.rot, qShipSR.x, qShipSR.y);
-                //        break;
-
-                //    case QueueType.GAMEOBJ_SR:
-                //        GameObjMsg_SR qGameSR = (GameObjMsg_SR)qH.data;
-                //        GameObjManager.Instance().RevieveFromeInQ(qGameSR);
-                //        Debug.WriteLine("Recv -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}->{3}, GameObjID {4} #{5}",
-                //            qH.inSeqNum, qH.outSeqNum, qH.type, qGameSR.GetType(), qGameSR.gameObjId, qGameSR.state);
-                //        break;
-                //    default:
-                //        break;
-                        
-                //}
             }
         }
     }

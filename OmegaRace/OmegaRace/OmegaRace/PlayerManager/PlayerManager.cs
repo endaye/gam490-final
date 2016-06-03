@@ -119,26 +119,27 @@ namespace OmegaRace
 
         private void respawnData(PlayerID _id)
         {
-
+            Ship p1Ship = PlayerManager.Instance().getPlayer(PlayerID.one).playerShip;
+            Ship p2Ship = PlayerManager.Instance().getPlayer(PlayerID.two).playerShip;
             switch (_id)
             {
                 case PlayerID.one:
-                    {
-                    Ship p2Ship = PlayerManager.Instance().getPlayer(PlayerID.two).playerShip;
 
-                    if(p2Ship.spriteRef.pos.Y < 95)
-                        Data.Instance().createShip1(new Vector2(150, 130), (float)(90.0f * (Math.PI / 180.0f))); 
+                    if (p2Ship.spriteRef.pos.Y < 95)
+                        //Data.Instance().createShip1(new Vector2(150, 130), (float)(90.0f * (Math.PI / 180.0f))); 
+                        p1Ship.Reset(new Vector2(150, 130), (float)(90.0f * (Math.PI / 180.0f)));
                     else
-                        Data.Instance().createShip1(new Vector2(150, 60), -(float)(90.0f * (Math.PI / 180.0f))); 
+                        //Data.Instance().createShip1(); 
+                        p1Ship.Reset(new Vector2(150, 60), -(float)(90.0f * (Math.PI / 180.0f)));
                     break;
-                    }
-                case PlayerID.two:
-                    Ship p1Ship = PlayerManager.Instance().getPlayer(PlayerID.one).playerShip;
 
-                    if(p1Ship.spriteRef.pos.Y > 95)
-                        Data.Instance().createShip2(new Vector2(150, 60), -(float)(90.0f * (Math.PI / 180.0f))); 
+                case PlayerID.two:
+                    if (p1Ship.spriteRef.pos.Y > 95)
+                        //Data.Instance().createShip2(new Vector2(150, 60), -(float)(90.0f * (Math.PI / 180.0f)));
+                        p2Ship.Reset(new Vector2(150, 60), -(float)(90.0f * (Math.PI / 180.0f)));
                     else
-                        Data.Instance().createShip2(new Vector2(150, 130), (float)(90.0f * (Math.PI / 180.0f))); 
+                        //Data.Instance().createShip2(new Vector2(150, 130), (float)(90.0f * (Math.PI / 180.0f)));
+                        p2Ship.Reset(new Vector2(150, 130), (float)(90.0f * (Math.PI / 180.0f)));
                     break;
             }
         }

@@ -17,6 +17,8 @@ namespace OmegaRace
         private float fenceScale;
         private float shipScale;
 
+        private int globalIndex = 0;
+
         private Data()
         {
             fencePostScale = 0.5f;
@@ -35,6 +37,11 @@ namespace OmegaRace
         {
             createShip1(new Vector2(150, 60), - (float)(90.0f * (Math.PI / 180.0f)));
             createShip2(new Vector2(150, 130),  (float)(90.0f * (Math.PI / 180.0f)));
+            for (int i = 0; i < 3; i++)
+            {
+                createMissile(PlayerID.one);
+                createMissile(PlayerID.two);
+            }
             createFences();
             createFencePosts();
             createCenterFences();
@@ -93,8 +100,6 @@ namespace OmegaRace
             ///////////////////////////////////////
 
             // Set sprite body reference
-
-            
             PhysicsMan.Instance().addPhysicsObj(p1, body);
             //////////////////
 
@@ -145,16 +150,11 @@ namespace OmegaRace
             bd.type = BodyType.Dynamic;
             bd.position = new Vector2(p2.spriteRef.pos.X, p2.spriteRef.pos.Y);
            
-            
-
-
             var body = world.CreateBody(bd);
 
             body.CreateFixture(fd);
             body.SetUserData(p2);
             body.Rotation = _rot;
-
-
 
             PhysicsMan.Instance().addPhysicsObj(p2, body);
 
@@ -164,6 +164,68 @@ namespace OmegaRace
 
             GameObjManager.Instance().addGameObj(p2);
         }
+
+        public void createMissile(PlayerID id)
+        {
+            Ship pShip = PlayerManager.Instance().getPlayer(id).playerShip;
+            Body pShipBody = pShip.physicsObj.body;
+
+            //Vector2 initPos = new Vector2(pShip.spriteRef.pos.X, pShip.spriteRef.pos.Y); 
+            Vector2 initPos = new Vector2(20.0f + 15 * globalIndex++, 20.0f); 
+
+            ////////////////  For Sprite System use ///////////////
+            Sprite missileSprite = (Sprite)DisplayManager.Instance().getDisplayObj(SpriteEnum.Missile);
+            Sprite_Proxy proxyMissile = new Sprite_Proxy(missileSprite, initPos.X, initPos.Y, 0.5f, pShip.spriteRef.color);
+            Missile missile = new Missile(GameObjType.p1missiles, proxyMissile, id);
+            //////////////////////////////////////
+
+
+            // Box2D Body Setup/////////////////////////
+            SBNode missileBatch = SpriteBatchManager.Instance().getBatch(batchEnum.missiles);
+            missileBatch.addDisplayObject(proxyMissile);
+
+            World world = Game1.GameInstance.getWorld();
+
+            var missileShape = new PolygonShape();
+
+            missileShape.SetAsBox(3, 3);
+
+            var fd = new FixtureDef();
+            fd.shape = missileShape;
+            fd.restitution = 0.0f;
+            fd.friction = 0.0f;
+            fd.density = 0.0001f;
+            fd.userData = missile;
+
+            // Grab ship orientation vector
+            //Vector2 direction = new Vector2((float)(Math.Cos(pShipBody.GetAngle())), (float)(Math.Sin(pShipBody.GetAngle())));
+            //direction.Normalize();
+
+            BodyDef bd = new BodyDef();
+            bd.fixedRotation = true;
+            bd.type = BodyType.Dynamic;
+            //bd.position = (new Vector2(pShip.spriteRef.pos.X, pShip.spriteRef.pos.Y)) + (direction * 10);
+            bd.position = initPos;
+
+            var body = world.CreateBody(bd);
+            body.SetBullet(true);
+            body.Rotation = pShipBody.Rotation;
+            body.CreateFixture(fd);
+            body.SetUserData(missile);
+            //////////////////////////////////////
+
+            // direction *= 1000;
+
+            //body.ApplyLinearImpulse(direction, body.GetWorldCenter());
+
+            PhysicsMan.Instance().addPhysicsObj(missile, body);
+
+            PlayerManager.Instance().getPlayer(id).setMissle(missile);
+
+            GameObjManager.Instance().addGameObj(missile);
+        }
+
+        #region Fences
 
         private void createFences()
         {
@@ -177,7 +239,7 @@ namespace OmegaRace
             // Right Wall  ///////
             createFence5();
             createFence6();
-            
+
             // Left Wall ////////////
             createFence7();
             createFence8();
@@ -1065,8 +1127,7 @@ namespace OmegaRace
         }
 
 
-        
+        #endregion
 
-        
     }
 }
