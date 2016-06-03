@@ -44,10 +44,10 @@ namespace OmegaRace
         public PlayerID playerId;
         public float rotation;
         public float impulse;
-        public bool missle;
-        public bool bomb;
+        public int missle;
+        public int bomb;
 
-        public Ship_RS(PlayerID _id, float _rot, float _imp, bool _missle, bool _bomb)
+        public Ship_RS(PlayerID _id, float _rot, float _imp, int _missle, int _bomb)
         {
            playerId = _id;
            rotation = _rot;
@@ -79,11 +79,11 @@ namespace OmegaRace
                 if (velocity.Length() > MaxSpeed)
                     player.playerShip.physicsObj.body.SetLinearVelocity((MaxSpeed / velocity.Length() * velocity));
             }
-            if (missle)
+            if (missle > -1)
             {
                 player.createMissile();
             }
-            if (bomb)
+            if (bomb > -1)
             {
                 GameObjManager.Instance().createBomb(player.id);
             }

@@ -57,7 +57,7 @@ namespace OmegaRace
             _q.Enqueue(_data);
         }
 
-        public void pullFromNetwork(LocalNetworkGamer localGamer)
+        private void pullFromNetwork(LocalNetworkGamer localGamer)
         {
             while (localGamer.IsDataAvailable)
             {
@@ -76,8 +76,8 @@ namespace OmegaRace
                         CollisionManager.PlayerID id = (CollisionManager.PlayerID)packetReader.ReadInt32();
                         float rot = packetReader.ReadSingle();
                         float imp = packetReader.ReadSingle();
-                        bool missle = packetReader.ReadBoolean();
-                        bool bomb = packetReader.ReadBoolean();
+                        int missle = packetReader.ReadInt32();
+                        int bomb = packetReader.ReadInt32();
                         Ship_RS qShipRS = new Ship_RS(id, rot, imp, missle, bomb);
                         qShipRS.inSeqNum = inSeqNum;
                         qShipRS.outSeqNum = outSeqNum;
@@ -121,6 +121,8 @@ namespace OmegaRace
 
         public void process(LocalNetworkGamer localGamer)
         {
+            this.pullFromNetwork(localGamer);
+
             // Number of elements in queue
             int count = _q.Count;
 

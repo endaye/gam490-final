@@ -191,10 +191,8 @@ namespace OmegaRace
 
         #region Update
 
-        /// <summary>
         /// Allows the game to run logic such as updating the world,
         /// checking for collisions, gathering input, and playing audio.
-        /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
@@ -217,6 +215,8 @@ namespace OmegaRace
 
             base.Update(gameTime);
         }
+
+        #region Menu
 
         // Menu screen provides options to create or join network sessions.
         void UpdateMenuScreen()
@@ -317,14 +317,21 @@ namespace OmegaRace
             networkSession = null;
         }
 
+        #endregion
+
+        #region Game Part
 
         // Updates the state of the network session, moving the tanks
         // around and synchronizing their state over the network.
         void UpdateNetworkSession(GameTime gameTime)
         {
+            // Read inputs for locally controlled tanks, and send them to the server.
+            LocalNetworkGamer localGamer = networkSession.LocalGamers.ToArray<LocalNetworkGamer>()[0];
+
+            // Get data from the network, process the input Queue to push to game
+            inQueue.process(localGamer);
             
-            // If we are the server, update all the tanks and transmit
-            // their latest positions back out over the network.
+            // update server
             if (state == gameState.game && networkSession.IsHost)
             {
                 UpdateServer(gameTime);
@@ -334,15 +341,6 @@ namespace OmegaRace
 
             // copy data from PhysicsMan to GameObjManager
             PhysicsMan.Instance().Update();
-
-            // Read inputs for locally controlled tanks, and send them to the server.
-            LocalNetworkGamer localGamer = networkSession.LocalGamers.ToArray<LocalNetworkGamer>()[0];
-            
-            // Get data from the network
-            inQueue.pullFromNetwork(localGamer);
-
-            // Process the input Queue to push to game
-            inQueue.process(localGamer);
 
             UpdateLocalGamer(localGamer, gameTime);
 
@@ -370,10 +368,6 @@ namespace OmegaRace
 
             if (state == gameState.game)
             {
-                // add it to PhysicsMan
-                // Box2D update
-                // world.Step((float)gameTime.ElapsedGameTime.TotalSeconds, 5, 8);
-
                 ScoreManager.Instance().Update();
 
                 // copy game objects to sprites objects
@@ -384,37 +378,16 @@ namespace OmegaRace
             Game1.Camera.Update(gameTime);
         }
 
-        // This method only runs on the server. It calls Update on all the
-        // tank instances, both local and remote, using inputs that have
-        // been received over the network. It then sends the resulting
-        // tank position data to everyone in the session.
         void UpdateServer(GameTime gameTime)
         {
             if (state == gameState.game)
             {
                 world.Step((float)gameTime.ElapsedGameTime.TotalSeconds, 5, 8);
-                //PhysicsMan.Instance().Update();
                 PhysicsMan.Instance().pushToBuffer();
             }
-
-            //if (player1 != null)
-            //{
-            //    ShipMsg_SR qShipSR1 = new ShipMsg_SR();
-            //    qShipSR1.playerId = player1.id;
-            //    player1.playerShip.getShipSR(ref qShipSR1);
-            //    // outQueue.add(qShipSR1);
-            //}
-            //if (player2 != null)
-            //{
-            //    ShipMsg_SR qShipSR2 = new ShipMsg_SR();
-            //    qShipSR2.playerId = player2.id;
-            //    player2.playerShip.getShipSR(ref qShipSR2);
-            //    // outQueue.add(qShipSR2);
-            //}
-
-
         }
 
+        #endregion
 
         #endregion
 
@@ -518,8 +491,8 @@ namespace OmegaRace
 
             float rot = 0.0f;
             float imp = 0.0f;
-            bool launchMissle = false;
-            bool launchBomb = false;
+            int missle = -1;
+            int bomb = -1;
 
 
             if (oldState.IsKeyDown(Keys.D) || P1oldPadState.IsButtonDown(Buttons.DPadRight))
@@ -539,11 +512,12 @@ namespace OmegaRace
 
             if ((oldState.IsKeyDown(Keys.X) && newState.IsKeyUp(Keys.X)) || (P1oldPadState.IsButtonDown(Buttons.A) && P1newPadState.IsButtonUp(Buttons.A)))
             {
-                //if (this.state == PlayerState.alive && this.missileAvailable())
-                //{
-                //    player1.createMissile();
-                //}
-                launchMissle = true;
+                if (playerCtrl.state == PlayerState.alive && playerCtrl.missileAvailable())
+                {
+                    playerCtrl.createMissile();
+                    
+                }
+                
 
             }
 
@@ -551,7 +525,7 @@ namespace OmegaRace
             {
                 //if (player1.state == PlayerState.alive && BombManager.Instance().bombAvailable(PlayerID.one))
                 //    GameObjManager.Instance().createBomb(PlayerID.one);
-                launchBomb = true;
+                bomb = -1;
             }
 
             #endregion
@@ -609,9 +583,9 @@ namespace OmegaRace
             //P2oldPadState = P2newPadState;
             oldState = newState;
 
-            if (rot != 0.0f || imp != 0.0f || launchMissle || launchBomb)
+            if (rot != 0.0f || imp != 0.0f || missle > -1 || bomb > -1)
             {
-                Ship_RS qShipRS = new Ship_RS(playerCtrl.id, rot, imp, launchMissle, launchBomb);
+                Ship_RS qShipRS = new Ship_RS(playerCtrl.id, rot, imp, missle, bomb);
                 outQueue.add(qShipRS);
             }
         }

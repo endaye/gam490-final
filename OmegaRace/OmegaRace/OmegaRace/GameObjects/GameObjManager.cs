@@ -77,20 +77,6 @@ namespace CollisionManager
             destroyBodies(w);
         }
 
-        //public void RevieveFromInQ(GameObjMsg_SR qGameSR) 
-        //{
-        //    GameObjNode node = this.findGameObj(qGameSR.id);
-        //    switch (qGameSR.colEvent)
-        //    {
-        //        case GameObjSRState.HIT_SHIP_WALL:
-        //            ((Wall)node.gameObj).WallHitShip();
-        //            break;
-        //        default:
-        //            break;
-        //    }
-
-        //}
-
         public void remove(batchEnum _enum, GameObject _obj)
         {
             GameObjNode node = findGameObj(_obj);

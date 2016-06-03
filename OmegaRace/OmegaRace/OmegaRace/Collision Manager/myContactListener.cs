@@ -11,8 +11,6 @@ namespace OmegaRace
     class myContactListener : IContactListener
     {
 
-
-
         public  void BeginContact(Contact contact)
         {
             GameObject A = (GameObject)contact.GetFixtureA().GetUserData();
