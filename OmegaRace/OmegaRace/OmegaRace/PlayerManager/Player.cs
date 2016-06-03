@@ -255,10 +255,14 @@ namespace CollisionManager
             Ship pShip = playerShip;
             Body pShipBody = pShip.physicsObj.body;
 
+            ////////////////  For Sprite System use ///////////////
             Sprite missileSprite = (Sprite)DisplayManager.Instance().getDisplayObj(SpriteEnum.Missile);
             Sprite_Proxy proxyMissile = new Sprite_Proxy(missileSprite, (int)pShip.spriteRef.pos.X, (int)pShip.spriteRef.pos.Y, 0.5f, pShip.spriteRef.color);
             Missile missile = new Missile(missileType, proxyMissile, id);
+            //////////////////////////////////////
 
+
+            // Box2D Body Setup/////////////////////////
             SBNode missileBatch = SpriteBatchManager.Instance().getBatch(batchEnum.missiles);
             missileBatch.addDisplayObject(proxyMissile);
 
@@ -292,7 +296,7 @@ namespace CollisionManager
             body.Rotation = pShipBody.Rotation;
             body.CreateFixture(fd);
             body.SetUserData(missile);
-
+            //////////////////////////////////////
 
             direction *= 1000;
 
