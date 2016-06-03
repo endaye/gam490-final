@@ -72,11 +72,11 @@ namespace OmegaRace
             }
             if (missle)
             {
-
+                player.createMissile();
             }
             if (bomb)
             {
-
+                GameObjManager.Instance().createBomb(player.id);
             }
         }
     }
@@ -112,6 +112,52 @@ namespace OmegaRace
 
     }
 
+    class Col_Event_SR : Message
+    {
+        //Data in message
+        public int GameObjA_ID;
+        public int GameObjB_ID;
+        public Vector2 ColPos;
+
+        public Col_Event_SR(Col_Event_SR msg)
+        {
+            this.GameObjA_ID = msg.GameObjA_ID;
+            this.GameObjB_ID = msg.GameObjB_ID;
+            this.ColPos = msg.ColPos;
+        }
+
+        public Col_Event_SR(int GameObjA_ID, int GameObjB_ID, Vector2 ColPos)
+        {
+            this.GameObjA_ID = GameObjA_ID;
+            this.GameObjB_ID = GameObjB_ID;
+            this.ColPos = ColPos;
+        }
+
+        override public QueueType getQueueType()
+        {
+            return QueueType.COL_EVENT_SR;
+        }
+
+        override public void execute()
+        {
+            GameObject A = GameObjManager.Instance().findGameObj(this.GameObjA_ID).gameObj;
+            GameObject B = GameObjManager.Instance().findGameObj(this.GameObjB_ID).gameObj;
+            Vector2 Cpos = this.ColPos;
+
+            if (A != null && B != null)
+            {
+                if (A.type < B.type)
+                {
+                    A.Accept(B, Cpos);
+                }
+                else
+                {
+                    B.Accept(A, Cpos);
+                }
+            }
+        }
+    }
+
     //public class Col_Event_SR : Message
     //{
     //    public int id;
@@ -143,51 +189,7 @@ namespace OmegaRace
     //    abstract public QueueType getQueueType();
     //}
 
-    //class Col_Event_Message : Message
-    //{
-    //    //Data in message
-    //    int GameObjA_ID;
-    //    int GameObjB_ID;
-    //    Vector2 ColPos;
-
-    //    public Col_Event_Message(Col_Event_Message msg)
-    //    {
-    //        this.GameObjA_ID = msg.GameObjA_ID;
-    //        this.GameObjB_ID = msg.GameObjB_ID;
-    //        this.ColPos = msg.ColPos;
-    //    }
-
-    //    public Col_Event_Message(int GameObjA_ID, int GameObjB_ID, Vector2 ColPos)
-    //    {
-    //        this.GameObjA_ID = GameObjA_ID;
-    //        this.GameObjB_ID = GameObjB_ID;
-    //        this.ColPos = ColPos;
-    //    }
-
-    //    override public Queue_type getQueueType()
-    //    {
-    //        return Queue_type.QUEUE_COL_EVENT;
-    //    }
-
-    //    override public void execute()
-    //    {
-    //        GameObject A = GameObjManager.Instance().findGameObj(this.GameObjA_ID).gameObj;
-    //        GameObject B = GameObjManager.Instance().findGameObj(this.GameObjB_ID).gameObj;
-    //        Vector2 Cpos = this.ColPos;
-
-    //        if (A != null && B != null)
-    //        {
-    //            if (A.type < B.type)
-    //            {
-    //                A.Accept(B, Cpos);
-    //            }
-    //            else
-    //            {
-    //                B.Accept(A, Cpos);
-    //            }
-    //        }
-    //    }
-    //}
+    
 
 
     //abstract class Ship_Message : Message

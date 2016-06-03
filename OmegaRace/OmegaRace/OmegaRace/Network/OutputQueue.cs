@@ -75,24 +75,19 @@ namespace OmegaRace
                     case QueueType.SHIP_RS:
                         // Read the correct type of data
                         Ship_RS qShipRS = (Ship_RS)qH;
-                        Debug.WriteLine("Send -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}->{3}, Player {4}, rot {5}, imp {6}", 
-                            qH.inSeqNum, qH.outSeqNum, qH.type, qShipRS.type, qShipRS.playerId, qShipRS.rotation, qShipRS.impulse);
                         packetWriter.Write((int)qShipRS.playerId);
                         packetWriter.Write(qShipRS.rotation);
                         packetWriter.Write(qShipRS.impulse);
                         packetWriter.Write(qShipRS.missle);
                         packetWriter.Write(qShipRS.bomb);
-
-                        // Send the data to everyone in the session.
                         localGamer.SendData(packetWriter, SendDataOptions.InOrder);
+                        Debug.WriteLine("Send -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}, Player {3}, rot {4}, imp {5}",
+                            qH.inSeqNum, qH.outSeqNum, qH.type, qShipRS.playerId, qShipRS.rotation, qShipRS.impulse);
                         break;
 
                     case QueueType.PHYSICS_SR:
                         // Read the correct type of data
                         Physics_SR qPhysSR = (Physics_SR)qH;
-                        Debug.WriteLine("Send -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}->{3}, Count {4}", 
-                            qH.inSeqNum, qH.outSeqNum, qH.type, qPhysSR.type, qPhysSR.count);
-                        
                         packetWriter.Write(qPhysSR.count);
                         for (int j = 0; j < qPhysSR.count; j++ )
                         {
@@ -101,24 +96,21 @@ namespace OmegaRace
                             packetWriter.Write(qPhysSR.pBuffer[j].pos.X);
                             packetWriter.Write(qPhysSR.pBuffer[j].pos.Y);
                         }
-
-                        // Send the data to everyone in the session.
                         localGamer.SendData(packetWriter, SendDataOptions.InOrder);
-
+                        Debug.WriteLine("Send -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}, Count {3}",
+                           qH.inSeqNum, qH.outSeqNum, qH.type, qPhysSR.count);
                         break;
 
-                    //case QueueType.COL_EVENT_SR:
-                    //    GameObjMsg_SR qGameSR = (GameObjMsg_SR)qH.data;
-                    //    Debug.WriteLine("Send -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}->{3}, GameObjID {4} #{5}",
-                    //        qH.inSeqNum, qH.outSeqNum, qH.type, qGameSR.GetType(), qGameSR.gameObjId, qGameSR.state);
-                    //    // Always push to network (wether it's local or external)
-                    //    // Write the tank state into a network packet.
-                    //    packetWriter.Write(qH.inSeqNum);
-                    //    packetWriter.Write(qH.outSeqNum);
-                    //    packetWriter.Write((int)qH.type);
-                    //    packetWriter.Write(qGameSR.gameObjId);
-                    //    packetWriter.Write((int)qGameSR.state);
-                    //    break;
+                    case QueueType.COL_EVENT_SR:
+                        Col_Event_SR qColEvent_SR = (Col_Event_SR)qH;
+                        packetWriter.Write(qColEvent_SR.GameObjA_ID);
+                        packetWriter.Write(qColEvent_SR.GameObjB_ID);
+                        packetWriter.Write(qColEvent_SR.ColPos.X);
+                        packetWriter.Write(qColEvent_SR.ColPos.Y);
+                        localGamer.SendData(packetWriter, SendDataOptions.InOrder);
+                        Debug.WriteLine("Send -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}, A_ID#{3}, B_ID#{4}, Pos [{5,2}, {6,2}] ",
+                            qH.inSeqNum, qH.outSeqNum, qH.type, qColEvent_SR.GameObjA_ID, qColEvent_SR.GameObjB_ID, qColEvent_SR.ColPos.X, qColEvent_SR.ColPos.Y);
+                        break;
                     default:
                         break;
                 }

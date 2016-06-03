@@ -97,23 +97,21 @@ namespace OmegaRace
                             qPhysSR.pBuffer[i] = new PhysicsBuffer();
                             qPhysSR.pBuffer[i].id = packetReader.ReadInt32();
                             qPhysSR.pBuffer[i].rot = packetReader.ReadSingle();
-                            Vector2 v = new Vector2();
-                            v.X = 1.0f;
-                            v.Y = 2.0f;
                             qPhysSR.pBuffer[i].pos.X = packetReader.ReadSingle();
                             qPhysSR.pBuffer[i].pos.Y = packetReader.ReadSingle();
-                            //qPhysSR.pBuffer[i].pos = v;
                         }
                         this.add(qPhysSR);
                         break;
 
-                    //case QueueType.GAMEOBJ_SR:
-                    //    GameObjMsg_SR qGameSR;
-                    //    qGameSR.gameObjId = packetReader.ReadInt32();
-                    //    qGameSR.state = (CollisionManager.GameObjSRState)packetReader.ReadInt32();
-                    //    qH.data = qGameSR;
-                    //    this.add(qH);
-                    //    break;
+                    case QueueType.COL_EVENT_SR:
+                        int GameObjA_ID = packetReader.ReadInt32();
+                        int GameObjB_ID = packetReader.ReadInt32();
+                        float x = packetReader.ReadSingle();
+                        float y = packetReader.ReadSingle();
+                        Vector2 ColPos = new Vector2(x, y);
+                        Col_Event_SR qColEvent_SR = new Col_Event_SR(GameObjA_ID, GameObjB_ID, ColPos);
+                        this.add(qColEvent_SR);
+                        break;
                          
                     default:
                         break;

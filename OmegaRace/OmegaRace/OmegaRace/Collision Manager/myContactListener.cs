@@ -40,14 +40,15 @@ namespace OmegaRace
 
             if (A.CollideAvailable == true && B.CollideAvailable == true)
             {
-                if (A.type < B.type)
-                {
-                    A.Accept(B, ptA);
-                }
-                else
-                {
-                    B.Accept(A, ptA);
-                }
+                //if (A.type < B.type)
+                //{
+                //    A.Accept(B, ptA);
+                //}
+                //else
+                //{
+                //    B.Accept(A, ptA);
+                //}
+                pushToOutQueue(A.id, B.id, ptA);
             }
 
             if (A.type == GameObjType.p1missiles || A.type == GameObjType.p2missiles)
@@ -60,6 +61,8 @@ namespace OmegaRace
                 B.CollideAvailable = false;
             }
         }
+
+        
 
         public  void EndContact(Contact contact)
         {
@@ -74,7 +77,11 @@ namespace OmegaRace
         {
         }
 
-        
+        public void pushToOutQueue(int GameObjA_ID, int GameObjB_ID, Vector2 ColPos)
+        {
+            Col_Event_SR qColEvent_SR = new Col_Event_SR(GameObjA_ID, GameObjB_ID, ColPos);
+            OutputQueue.Instance.add(qColEvent_SR);
+        }
 
 
     }

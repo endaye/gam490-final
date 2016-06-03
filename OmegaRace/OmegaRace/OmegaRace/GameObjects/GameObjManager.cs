@@ -250,17 +250,11 @@ namespace CollisionManager
         {
             throw new NotImplementedException();
         }
-        
-
-       
 
         public void clear()
         {
             this.active = null;
             instance = null;
         }
-
-        
-
     }
 }
