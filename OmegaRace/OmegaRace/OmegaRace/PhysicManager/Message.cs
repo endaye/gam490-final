@@ -155,15 +155,22 @@ namespace OmegaRace
 
             if (A != null && B != null)
             {
-                if (A.type < B.type)
+                Debug.Assert(A != null);
+                Debug.Assert(B != null);
+
+                if (A.CollideAvailable == true && B.CollideAvailable == true)
                 {
-                    A.Accept(B, Cpos);
-                }
-                else
-                {
-                    B.Accept(A, Cpos);
+                    if (A.type < B.type)
+                    {
+                        A.Accept(B, Cpos);
+                    }
+                    else
+                    {
+                        B.Accept(A, Cpos);
+                    }
                 }
             }
+            
         }
     }
 

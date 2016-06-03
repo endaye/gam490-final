@@ -5,6 +5,7 @@ using System.Text;
 using Box2D.XNA;
 using CollisionManager;
 using Microsoft.Xna.Framework;
+using System.Diagnostics;
 
 namespace OmegaRace
 {
@@ -36,18 +37,10 @@ namespace OmegaRace
 
             //System.Console.Write(" point {0} {1}\n", ptA, ptB);
 
-            if (A.CollideAvailable == true && B.CollideAvailable == true)
-            {
-                //if (A.type < B.type)
-                //{
-                //    A.Accept(B, ptA);
-                //}
-                //else
-                //{
-                //    B.Accept(A, ptA);
-                //}
-                pushToOutQueue(A.id, B.id, ptA);
-            }
+            Debug.Assert(A != null);
+            Debug.Assert(B != null);
+
+            pushToOutQueue(A.id, B.id, ptA);
 
             if (A.type == GameObjType.p1missiles || A.type == GameObjType.p2missiles)
             {
