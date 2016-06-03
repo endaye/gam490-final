@@ -10,16 +10,6 @@ using OmegaRace;
 
 namespace CollisionManager
 {
-    public enum ColEventType
-    {
-        HIT_SHIP_WALL    = 0,   // rebound
-        HIT_SHIP_SHIP    = 1,   // rebound
-        HIT_SHIP_MISSILE = 2,   // ship dies, explosion
-        HIT_SHIP_BOMB    = 3,   // ship dies, explosion
-        HIT_MISSILE_WALL = 4,   // explosion
-        OTHER            = 5,   // no action
-    }
-
     enum GameObjState
     {
         alive,
