@@ -10,18 +10,14 @@ using OmegaRace;
 
 namespace CollisionManager
 {
-    public enum GameObjSRState
+    public enum ColEventType
     {
-        HIT_SHIP_WALL = 0,        // ship hits wall
-        HIT_SHIP_MISSILE = 1,
-        HIT_MISSILE_WALL = 2,
-        OTHER,
-    }
-
-    public struct GameObjData_SR
-    {
-        public int gameObjId;
-        public GameObjSRState state;     
+        HIT_SHIP_WALL    = 0,   // rebound
+        HIT_SHIP_SHIP    = 1,   // rebound
+        HIT_SHIP_MISSILE = 2,   // ship dies, explosion
+        HIT_SHIP_BOMB    = 3,   // ship dies, explosion
+        HIT_MISSILE_WALL = 4,   // explosion
+        OTHER            = 5,   // no action
     }
 
     enum GameObjState
@@ -41,7 +37,7 @@ namespace CollisionManager
 
         // Speed is m/s 
         // Note the max speed of any object is 120m/s  /////////
-        public static float MaxSpeed = 50;
+        public static float MaxSpeed = 50f;
 
         public Vector2 objSpeed;
 
@@ -50,18 +46,17 @@ namespace CollisionManager
 
         public OutputQueue outQueue = OutputQueue.Instance;
 
-        public static int globalGameObjId = 0;
+        private static int globalGameObjId = 0;
 
-        public int gameObjId;
+        public int id;
 
         public GameObject()
         {
-            gameObjId = globalGameObjId++;
+            id = globalGameObjId++;
             rotation = 0;
             location = new Vector2();
             this.CollideAvailable = true;
         }
-
 
         public virtual void Update()
         {
@@ -79,7 +74,5 @@ namespace CollisionManager
             rotation = rot;
             location = loc;
         }
-       
-
     }
 }

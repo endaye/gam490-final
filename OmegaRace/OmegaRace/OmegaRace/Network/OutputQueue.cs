@@ -8,29 +8,13 @@ using CollisionManager;
 
 namespace OmegaRace
 {
-    public enum QueueType
-    {
-        SHIP_RS,        // remote to server Ship action state
-        SHIP_SR,        // server to remote Ship pos & rot
-        GAMEOBJ_SR,     // server to remote GameObj state
-        OTHER,
-    }
-
-    struct NetworkData
-    {
-        public int  inSeqNum;
-        public int outSeqNum;
-        public QueueType type;
-        public Object data;
-    }
-
     class OutputQueue
     {
         #region Fields
 
         private static OutputQueue instance;
 
-        private static System.Collections.Generic.Queue<NetworkData> _q = new System.Collections.Generic.Queue<NetworkData>();
+        private static System.Collections.Generic.Queue<Message> _q = new System.Collections.Generic.Queue<Message>();
 
         private PacketWriter packetWriter = new PacketWriter();
 
@@ -65,28 +49,11 @@ namespace OmegaRace
 
         #endregion
 
-        public void add(Object _data)
+        public void add(Message outData)
         {
-            NetworkData outData;
             outData.outSeqNum = getOutSeqNum();
             outData.inSeqNum = -1;
-            if (_data.GetType().Equals(typeof(ShipData_RS))) 
-            {
-                outData.type = QueueType.SHIP_RS;
-            }
-            else if (_data.GetType().Equals(typeof(ShipData_SR))) 
-            {
-                outData.type = QueueType.SHIP_SR;
-            } 
-            else if (_data.GetType().Equals(typeof(GameObjData_SR)))
-            {
-                outData.type = QueueType.GAMEOBJ_SR;
-            }
-            else
-            {
-                outData.type = QueueType.OTHER;
-            }
-            outData.data = _data;
+            outData.type = outData.getQueueType();
             _q.Enqueue(outData);
         }
 
@@ -96,64 +63,62 @@ namespace OmegaRace
             for (int i = 0; i < count; i++)
             {
                 // Read the header
-                NetworkData qH = _q.Dequeue();
+                Message qH = _q.Dequeue();
+
+                // Always push to network (wether it's local or external)
+                packetWriter.Write(qH.inSeqNum);
+                packetWriter.Write(qH.outSeqNum);
+                packetWriter.Write((int)qH.type);
 
                 switch (qH.type)
                 {
                     case QueueType.SHIP_RS:
                         // Read the correct type of data
-                        ShipData_RS qShipRS = (ShipData_RS)qH.data;
-
-                        Debug.WriteLine("Send -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}->{3}, Player {4}", 
-                            qH.inSeqNum, qH.outSeqNum, qH.type, qShipRS.GetType(), qShipRS.playerId);
-                        
-                        // Always push to network (wether it's local or external)
-                        // Write the tank state into a network packet.
-                        packetWriter.Write(qH.inSeqNum);
-                        packetWriter.Write(qH.outSeqNum);
-                        packetWriter.Write((int)qH.type);
+                        Ship_RS qShipRS = (Ship_RS)qH;
+                        Debug.WriteLine("Send -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}->{3}, Player {4}, rot {5}, imp {6}", 
+                            qH.inSeqNum, qH.outSeqNum, qH.type, qShipRS.type, qShipRS.playerId, qShipRS.rotation, qShipRS.impulse);
                         packetWriter.Write((int)qShipRS.playerId);
                         packetWriter.Write(qShipRS.rotation);
                         packetWriter.Write(qShipRS.impulse);
+                        packetWriter.Write(qShipRS.missle);
+                        packetWriter.Write(qShipRS.bomb);
 
-                        // Send our input data to the server.
-                        //localGamer.SendData(packetWriter, SendDataOptions.InOrder, host);
+                        // Send the data to everyone in the session.
                         localGamer.SendData(packetWriter, SendDataOptions.InOrder);
                         break;
 
-                    case QueueType.SHIP_SR:
+                    case QueueType.PHYSICS_SR:
                         // Read the correct type of data
-                        ShipData_SR qShipSR = (ShipData_SR)qH.data;
-                        Debug.WriteLine("Send -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}->{3}, Player {4}", 
-                            qH.inSeqNum, qH.outSeqNum, qH.type, qShipSR.GetType(), qShipSR.playerId);
+                        Physics_SR qPhysSR = (Physics_SR)qH;
+                        Debug.WriteLine("Send -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}->{3}, Count {4}", 
+                            qH.inSeqNum, qH.outSeqNum, qH.type, qPhysSR.type, qPhysSR.count);
                         
-                        // Always push to network (wether it's local or external)
-                        // Write the tank state into a network packet.
-                        packetWriter.Write(qH.inSeqNum);
-                        packetWriter.Write(qH.outSeqNum);
-                        packetWriter.Write((int)qH.type);
-                        packetWriter.Write((int)qShipSR.playerId);
-                        packetWriter.Write(qShipSR.x);
-                        packetWriter.Write(qShipSR.y);
-                        packetWriter.Write(qShipSR.rot);
+                        packetWriter.Write(qPhysSR.count);
+                        for (int j = 0; j < qPhysSR.count; j++ )
+                        {
+                            packetWriter.Write(qPhysSR.pBuffer[j].id);
+                            packetWriter.Write(qPhysSR.pBuffer[j].rot);
+                            packetWriter.Write(qPhysSR.pBuffer[j].pos.X);
+                            packetWriter.Write(qPhysSR.pBuffer[j].pos.Y);
+                        }
 
                         // Send the data to everyone in the session.
                         localGamer.SendData(packetWriter, SendDataOptions.InOrder);
 
                         break;
 
-                    case QueueType.GAMEOBJ_SR:
-                        GameObjData_SR qGameSR = (GameObjData_SR)qH.data;
-                        Debug.WriteLine("Send -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}->{3}, GameObjID {4} #{5}",
-                            qH.inSeqNum, qH.outSeqNum, qH.type, qGameSR.GetType(), qGameSR.gameObjId, qGameSR.state);
-                        // Always push to network (wether it's local or external)
-                        // Write the tank state into a network packet.
-                        packetWriter.Write(qH.inSeqNum);
-                        packetWriter.Write(qH.outSeqNum);
-                        packetWriter.Write((int)qH.type);
-                        packetWriter.Write(qGameSR.gameObjId);
-                        packetWriter.Write((int)qGameSR.state);
-                        break;
+                    //case QueueType.COL_EVENT_SR:
+                    //    GameObjMsg_SR qGameSR = (GameObjMsg_SR)qH.data;
+                    //    Debug.WriteLine("Send -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}->{3}, GameObjID {4} #{5}",
+                    //        qH.inSeqNum, qH.outSeqNum, qH.type, qGameSR.GetType(), qGameSR.gameObjId, qGameSR.state);
+                    //    // Always push to network (wether it's local or external)
+                    //    // Write the tank state into a network packet.
+                    //    packetWriter.Write(qH.inSeqNum);
+                    //    packetWriter.Write(qH.outSeqNum);
+                    //    packetWriter.Write((int)qH.type);
+                    //    packetWriter.Write(qGameSR.gameObjId);
+                    //    packetWriter.Write((int)qGameSR.state);
+                    //    break;
                     default:
                         break;
                 }

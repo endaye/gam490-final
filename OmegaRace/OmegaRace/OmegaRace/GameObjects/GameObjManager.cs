@@ -77,19 +77,19 @@ namespace CollisionManager
             destroyBodies(w);
         }
 
-        public void RevieveFromeInQ(GameObjData_SR qGameSR) 
-        {
-            GameObjNode node = this.findGameObj(qGameSR.gameObjId);
-            switch (qGameSR.state)
-            {
-                case GameObjSRState.HIT_SHIP_WALL:
-                    ((Wall)node.gameObj).WallHitShip();
-                    break;
-                default:
-                    break;
-            }
+        //public void RevieveFromInQ(GameObjMsg_SR qGameSR) 
+        //{
+        //    GameObjNode node = this.findGameObj(qGameSR.id);
+        //    switch (qGameSR.colEvent)
+        //    {
+        //        case GameObjSRState.HIT_SHIP_WALL:
+        //            ((Wall)node.gameObj).WallHitShip();
+        //            break;
+        //        default:
+        //            break;
+        //    }
 
-        }
+        //}
 
         public void remove(batchEnum _enum, GameObject _obj)
         {
@@ -145,7 +145,7 @@ namespace CollisionManager
             return (outNode as GameObjNode);
         }
 
-        private GameObjNode findGameObj(int _objId)
+        public GameObjNode findGameObj(int _objId)
         {
             ManLink ptr = this.active;
 
@@ -153,7 +153,7 @@ namespace CollisionManager
 
             while (ptr != null)
             {
-                if ((ptr as GameObjNode).gameObj.gameObjId == _objId)
+                if ((ptr as GameObjNode).gameObj.id == _objId)
                 {
                     outNode = ptr;
                     break;

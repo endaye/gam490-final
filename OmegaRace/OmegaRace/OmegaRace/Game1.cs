@@ -149,7 +149,7 @@ namespace OmegaRace
             base.Initialize();
         }
 
-    
+
         // LoadContent will be called once per game and is the place to load
         // all of your content.
         protected override void LoadContent()
@@ -305,7 +305,7 @@ namespace OmegaRace
 
             // Register the new player:
             Debug.WriteLine("--> Gamer join: {0} \n", gamerIndex);
-            
+
         }
 
         // Event handler notifies us when the network session has ended.
@@ -322,27 +322,29 @@ namespace OmegaRace
         // around and synchronizing their state over the network.
         void UpdateNetworkSession(GameTime gameTime)
         {
-            LocalNetworkGamer localGamer = null;
-
-            // Read inputs for locally controlled tanks, and send them to the server.
-            foreach (LocalNetworkGamer gamer in networkSession.LocalGamers)
-            {
-                localGamer = gamer;
-                UpdateLocalGamer(gamer, gameTime);
-            }
-
+            
             // If we are the server, update all the tanks and transmit
             // their latest positions back out over the network.
             if (state == gameState.game && networkSession.IsHost)
             {
-                UpdateServer();
+                UpdateServer(gameTime);
             }
 
+            checkInput();
+
+            // copy data from PhysicsMan to GameObjManager
+            PhysicsMan.Instance().Update();
+
+            // Read inputs for locally controlled tanks, and send them to the server.
+            LocalNetworkGamer localGamer = networkSession.LocalGamers.ToArray<LocalNetworkGamer>()[0];
+            
             // Get data from the network
             inQueue.pullFromNetwork(localGamer);
 
             // Process the input Queue to push to game
             inQueue.process(localGamer);
+
+            UpdateLocalGamer(localGamer, gameTime);
 
             // Pump the underlying session object.
             networkSession.Update();
@@ -354,11 +356,13 @@ namespace OmegaRace
             // Push data to the network
             outQueue.pushToNetwork(localGamer);
 
-            Debug.WriteLine("P1.pos [{0}, {1}],  P2.pos [{2}, {3}]",
-                player1.playerShip.location.X,
-                player1.playerShip.location.Y,
-                player2.playerShip.location.X,
-                player2.playerShip.location.Y);
+            //Debug.WriteLine("P1.pos[{0}, {1}] rot[{2}],  P2.pos [{3}, {4}] rot [{5}]",
+            //    player1.playerShip.location.X,
+            //    player1.playerShip.location.Y,
+            //    player1.playerShip.rotation,
+            //    player2.playerShip.location.X,
+            //    player2.playerShip.location.Y,
+            //    player2.playerShip.rotation);
         }
 
         void UpdateLocalGamer(LocalNetworkGamer gamer, GameTime gameTime)
@@ -366,15 +370,13 @@ namespace OmegaRace
 
             if (state == gameState.game)
             {
-
-                world.Step((float)gameTime.ElapsedGameTime.TotalSeconds, 5, 8);
-
-                checkInput();
-
-                // PhysicsMan.Instance().Update();
+                // add it to PhysicsMan
+                // Box2D update
+                // world.Step((float)gameTime.ElapsedGameTime.TotalSeconds, 5, 8);
 
                 ScoreManager.Instance().Update();
 
+                // copy game objects to sprites objects
                 GameObjManager.Instance().Update(world);
 
                 Timer.Process(gameTime);
@@ -386,27 +388,30 @@ namespace OmegaRace
         // tank instances, both local and remote, using inputs that have
         // been received over the network. It then sends the resulting
         // tank position data to everyone in the session.
-        void UpdateServer()
+        void UpdateServer(GameTime gameTime)
         {
             if (state == gameState.game)
             {
-                PhysicsMan.Instance().Update();
+                world.Step((float)gameTime.ElapsedGameTime.TotalSeconds, 5, 8);
+                //PhysicsMan.Instance().Update();
+                PhysicsMan.Instance().pushToBuffer();
             }
 
-            if (player1 != null)
-            {
-                ShipData_SR qShipSR1 = new ShipData_SR();
-                qShipSR1.playerId = player1.id;
-                player1.playerShip.getShipSR(ref qShipSR1);
-                outQueue.add(qShipSR1);
-            }
-            if (player2 != null)
-            {
-                ShipData_SR qShipSR2 = new ShipData_SR();
-                qShipSR2.playerId = player2.id;
-                player2.playerShip.getShipSR(ref qShipSR2);
-                outQueue.add(qShipSR2);
-            }
+            //if (player1 != null)
+            //{
+            //    ShipMsg_SR qShipSR1 = new ShipMsg_SR();
+            //    qShipSR1.playerId = player1.id;
+            //    player1.playerShip.getShipSR(ref qShipSR1);
+            //    // outQueue.add(qShipSR1);
+            //}
+            //if (player2 != null)
+            //{
+            //    ShipMsg_SR qShipSR2 = new ShipMsg_SR();
+            //    qShipSR2.playerId = player2.id;
+            //    player2.playerShip.getShipSR(ref qShipSR2);
+            //    // outQueue.add(qShipSR2);
+            //}
+
 
         }
 
@@ -487,7 +492,7 @@ namespace OmegaRace
 
         #endregion
 
-        #region Handle Input
+        #region Input
 
         private void checkInput()
         {
@@ -602,10 +607,12 @@ namespace OmegaRace
 
             if (rot != 0.0f || imp != 0.0f)
             {
-                ShipData_RS qShipRS = new ShipData_RS();
+                Ship_RS qShipRS = new Ship_RS();
                 qShipRS.playerId = playerCtrl.id;
                 qShipRS.rotation = rot;
                 qShipRS.impulse = imp;
+                qShipRS.missle = false;
+                qShipRS.bomb = false;
                 outQueue.add(qShipRS);
             }
         }

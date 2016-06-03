@@ -11,8 +11,7 @@ using OmegaRace;
 
 namespace CollisionManager
 {
-
-    class Wall: GameObject
+    class Wall : GameObject
     {
         WaveBank waveBank;
         SoundBank soundBank;
@@ -50,25 +49,13 @@ namespace CollisionManager
 
         public override void VisitShip(Ship s, Vector2 _point)
         {
-            GameObjData_SR qGameSR = new GameObjData_SR();
-            qGameSR.gameObjId = this.gameObjId;
-            qGameSR.state = GameObjSRState.HIT_SHIP_WALL;
-            outQueue.add(qGameSR);
-        }
-
-        public void WallHitShip()
-        {
             playFenceHit();
             hit();
         }
 
-
-       
-
-
         private void reactionToWall(Wall w, Missile m, Vector2 _point)
         {
-           // Vector2 pos = m.physicsObj.body.GetWorldPoint(_man.LocalPoint);
+            // Vector2 pos = m.physicsObj.body.GetWorldPoint(_man.LocalPoint);
             Vector2 pos = _point;
 
             GameObjManager.Instance().addExplosion(pos, m.spriteRef.color);
@@ -94,6 +81,7 @@ namespace CollisionManager
             anim.addImage(ImageManager.Instance().getImage(ImageEnum.fence5));
             anim.addImage(ImageManager.Instance().getImage(ImageEnum.fence6));
             anim.addImage(ImageManager.Instance().getImage(ImageEnum.fence7));
+
         }
 
         public void hit()
@@ -120,6 +108,7 @@ namespace CollisionManager
                 data.count++;
 
                 Timer.Add(t_1, data, playAnim);
+
             }
         }
     }

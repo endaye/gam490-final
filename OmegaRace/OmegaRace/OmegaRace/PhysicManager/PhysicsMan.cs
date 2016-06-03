@@ -10,7 +10,7 @@ namespace OmegaRace
     class PhysicsMan : Manager
     {
         private static PhysicsMan instance;
-
+       
         private PhysicsMan()
         {
 
@@ -31,12 +31,14 @@ namespace OmegaRace
             this.privActiveAddToFront((ManLink)obj, ref this.active);
         }
 
+
         public void Update()
         {
             ManLink ptr = this.active;
             PhysicsObj physNode = null;
             Body body = null;
 
+            this.pullFromBuffer();
 
             while (ptr != null)
             {
@@ -47,7 +49,36 @@ namespace OmegaRace
 
                 ptr = ptr.next;
             }
+        }
 
+        public void pullFromBuffer()
+        {
+            if (Physics_SR.pBufferGlobal != null)
+            {
+                int count = Physics_SR.pBufferGlobal.count;
+                PhysicsBuffer[] physBuff = Physics_SR.pBufferGlobal.pBuffer;
+                for (int i = 0; i < count; i++)
+                {
+                    GameObjManager.Instance().findGameObj(physBuff[i].id).gameObj.physicsObj.setPhysicsBufferNode(physBuff[i]);
+                }
+            }
+        }
+
+        public void pushToBuffer()
+        {
+            ManLink ptr = this.active;
+            PhysicsObj physNode = null;
+            List<PhysicsBuffer> physBuffList = new List<PhysicsBuffer>();
+            PhysicsBuffer[] physBuff;
+            while (ptr != null)
+            {
+                physNode = (PhysicsObj)ptr;
+                physBuffList.Add(physNode.getPhysicsBufferNode());
+                ptr = ptr.next;
+            }
+            physBuff = physBuffList.ToArray();
+            Physics_SR.pBufferGlobal = new Physics_SR(ref physBuff);
+            OutputQueue.Instance.add(Physics_SR.pBufferGlobal);
         }
 
         public void removePhysicsObj(PhysicsObj _obj)

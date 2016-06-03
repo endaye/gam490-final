@@ -23,11 +23,24 @@ namespace OmegaRace
             body = _body;
         }
 
-
         public override Enum getName()
         {
             throw new NotImplementedException();
         }
 
+        public PhysicsBuffer getPhysicsBufferNode()
+        {
+            PhysicsBuffer physBuffNode = new PhysicsBuffer();
+            physBuffNode.id = this.gameObj.id;
+            physBuffNode.rot = this.body.Rotation;
+            physBuffNode.pos = this.body.Position;
+            return physBuffNode;
+        }
+
+        public void setPhysicsBufferNode(PhysicsBuffer physBuffNode)
+        {
+            this.body.Rotation = physBuffNode.rot;
+            this.body.Position = physBuffNode.pos;
+        }
     }
 }

@@ -11,20 +11,7 @@ using OmegaRace;
 namespace CollisionManager
 {
 
-    public struct ShipData_RS
-    {
-        public PlayerID playerId;
-        public Single rotation;
-        public Single impulse;
-    }
 
-    public struct ShipData_SR
-    {
-        public PlayerID playerId;
-        public float x;
-        public float y;
-        public float rot;
-    }
 
     class Ship: GameObject
     {
@@ -44,13 +31,6 @@ namespace CollisionManager
 
         }
 
-        public void getShipSR(ref ShipData_SR qShipSR)
-        {
-            qShipSR.x = this.physicsObj.body.Position.X;
-            qShipSR.y = this.physicsObj.body.Position.Y;
-            qShipSR.rot = this.physicsObj.body.Rotation;
-        }
-
         public override void Update()
         {
             Vector2 velocity = physicsObj.body.GetLinearVelocity();
@@ -58,28 +38,6 @@ namespace CollisionManager
                 physicsObj.body.SetLinearVelocity((MaxSpeed / velocity.Length() * velocity));
 
             base.Update();
-        }
-
-        public void Update(ShipData_RS _data)
-        {
-            this.physicsObj.body.Rotation += _data.rotation;
-            Vector2 direction = new Vector2((float)(Math.Cos(this.physicsObj.body.GetAngle())), (float)(Math.Sin(this.physicsObj.body.GetAngle())));
-            direction.Normalize();
-            direction *= MaxSpeed;
-            this.physicsObj.body.ApplyLinearImpulse(direction, this.physicsObj.body.GetWorldCenter());
-
-            Vector2 velocity = physicsObj.body.GetLinearVelocity();
-            if (velocity.Length() > MaxSpeed)
-                physicsObj.body.SetLinearVelocity((MaxSpeed / velocity.Length() * velocity));
-        }
-
-        public void Update(ShipData_SR _data)
-        {
-            Vector2 velocity = physicsObj.body.GetLinearVelocity();
-            if (velocity.Length() > MaxSpeed)
-                physicsObj.body.SetLinearVelocity((MaxSpeed / velocity.Length() * velocity));
-
-            pushPhysics(_data.rot, new Vector2(_data.x, _data.y));
         }
        
         public override void Accept(GameObject other, Vector2 _point)
@@ -141,8 +99,6 @@ namespace CollisionManager
             }
             else { }
 
-            
-            
         }
 
         private void reactionToShip(Ship s, Bomb b, Vector2 _point)
@@ -207,6 +163,5 @@ namespace CollisionManager
             Cue hit_Cue = soundBank.GetCue("Mine_Pop_Cue");
             hit_Cue.Play();
         }
-
     }
 }
