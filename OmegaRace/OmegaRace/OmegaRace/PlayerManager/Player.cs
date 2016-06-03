@@ -242,6 +242,16 @@ namespace CollisionManager
         public void createMissile()
         {
 
+            //if (this.state == PlayerState.alive && this.missileAvailable())
+            //{
+            //    this.createMissile();
+            //}
+
+            if (this.state != PlayerState.alive || !this.missileAvailable())
+            {
+                return;
+            }
+
             Ship pShip = playerShip;
             Body pShipBody = pShip.physicsObj.body;
 

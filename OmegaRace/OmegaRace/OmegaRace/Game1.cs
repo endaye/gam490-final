@@ -83,8 +83,8 @@ namespace OmegaRace
         GamePadState P1oldPadState;
         GamePadState P1newPadState;
 
-        GamePadState P2oldPadState;
-        GamePadState P2newPadState;
+        //GamePadState P2oldPadState;
+        //GamePadState P2newPadState;
 
         // For flipping game states
         public static gameState state;
@@ -496,10 +496,10 @@ namespace OmegaRace
 
         private void checkInput()
         {
-            newState = Keyboard.GetState();
+            //newState = Keyboard.GetState();
             P1newPadState = GamePad.GetState(PlayerIndex.One);
-            P2newPadState = GamePad.GetState(PlayerIndex.Two);
-            newPadState = P1newPadState;
+            //P2newPadState = GamePad.GetState(PlayerIndex.Two);
+            //newPadState = P1newPadState;
 
             /*
             // Read the gamepad.
@@ -518,6 +518,9 @@ namespace OmegaRace
 
             float rot = 0.0f;
             float imp = 0.0f;
+            bool launchMissle = false;
+            bool launchBomb = false;
+
 
             if (oldState.IsKeyDown(Keys.D) || P1oldPadState.IsButtonDown(Buttons.DPadRight))
             {
@@ -536,18 +539,19 @@ namespace OmegaRace
 
             if ((oldState.IsKeyDown(Keys.X) && newState.IsKeyUp(Keys.X)) || (P1oldPadState.IsButtonDown(Buttons.A) && P1newPadState.IsButtonUp(Buttons.A)))
             {
-                if (player1.state == PlayerState.alive && player1.missileAvailable())
-                {
-                    player1.createMissile();
-                }
+                //if (this.state == PlayerState.alive && this.missileAvailable())
+                //{
+                //    player1.createMissile();
+                //}
+                launchMissle = true;
 
             }
 
             if (oldState.IsKeyDown(Keys.C) && newState.IsKeyUp(Keys.C) || (P1oldPadState.IsButtonDown(Buttons.B) && P1newPadState.IsButtonUp(Buttons.B)))
             {
-                if (player1.state == PlayerState.alive && BombManager.Instance().bombAvailable(PlayerID.one))
-                    GameObjManager.Instance().createBomb(PlayerID.one);
-
+                //if (player1.state == PlayerState.alive && BombManager.Instance().bombAvailable(PlayerID.one))
+                //    GameObjManager.Instance().createBomb(PlayerID.one);
+                launchBomb = true;
             }
 
             #endregion
@@ -602,17 +606,12 @@ namespace OmegaRace
             #endregion
 
             P1oldPadState = P1newPadState;
-            P2oldPadState = P2newPadState;
+            //P2oldPadState = P2newPadState;
             oldState = newState;
 
-            if (rot != 0.0f || imp != 0.0f)
+            if (rot != 0.0f || imp != 0.0f || launchMissle || launchBomb)
             {
-                Ship_RS qShipRS = new Ship_RS();
-                qShipRS.playerId = playerCtrl.id;
-                qShipRS.rotation = rot;
-                qShipRS.impulse = imp;
-                qShipRS.missle = false;
-                qShipRS.bomb = false;
+                Ship_RS qShipRS = new Ship_RS(playerCtrl.id, rot, imp, launchMissle, launchBomb);
                 outQueue.add(qShipRS);
             }
         }
@@ -622,7 +621,7 @@ namespace OmegaRace
         {
             newState = Keyboard.GetState();
             P1newPadState = GamePad.GetState(PlayerIndex.One);
-            P2newPadState = GamePad.GetState(PlayerIndex.Two);
+            //P2newPadState = GamePad.GetState(PlayerIndex.Two);
             newPadState = P1newPadState;
 
             // Check for exit.

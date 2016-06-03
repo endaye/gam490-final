@@ -73,15 +73,15 @@ namespace OmegaRace
                 switch (type)
                 {
                     case QueueType.SHIP_RS:
-                        Ship_RS qShipRS = new Ship_RS();
+                        CollisionManager.PlayerID id = (CollisionManager.PlayerID)packetReader.ReadInt32();
+                        float rot = packetReader.ReadSingle();
+                        float imp = packetReader.ReadSingle();
+                        bool missle = packetReader.ReadBoolean();
+                        bool bomb = packetReader.ReadBoolean();
+                        Ship_RS qShipRS = new Ship_RS(id, rot, imp, missle, bomb);
                         qShipRS.inSeqNum = inSeqNum;
                         qShipRS.outSeqNum = outSeqNum;
                         qShipRS.type = type;
-                        qShipRS.playerId = (CollisionManager.PlayerID)packetReader.ReadInt32();
-                        qShipRS.rotation = packetReader.ReadSingle();
-                        qShipRS.impulse = packetReader.ReadSingle();
-                        qShipRS.missle = packetReader.ReadBoolean();
-                        qShipRS.bomb = packetReader.ReadBoolean();
                         this.add(qShipRS);
                         break;
 

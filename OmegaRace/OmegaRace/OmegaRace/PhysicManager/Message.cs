@@ -42,10 +42,19 @@ namespace OmegaRace
     public class Ship_RS : Message
     {
         public PlayerID playerId;
-        public Single rotation;
-        public Single impulse;
+        public float rotation;
+        public float impulse;
         public bool missle;
         public bool bomb;
+
+        public Ship_RS(PlayerID _id, float _rot, float _imp, bool _missle, bool _bomb)
+        {
+           playerId = _id;
+           rotation = _rot;
+           impulse = _imp;
+           missle = _missle;
+           bomb = _bomb;
+        }
 
         public override QueueType getQueueType()
         {
