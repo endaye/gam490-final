@@ -85,6 +85,13 @@ namespace OmegaRace
                             qH.inSeqNum, qH.outSeqNum, qH.type, qShipRS.playerId, qShipRS.rotation, qShipRS.impulse);
                         break;
 
+                    case QueueType.SHIP_MISSILE_SR:
+                        Ship_Missile_SR qShipMissSR = (Ship_Missile_SR)qH;
+                        packetWriter.Write((int)qShipMissSR.playerId);
+                        Debug.WriteLine("Send -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}, Player {3}",
+                           qH.inSeqNum, qH.outSeqNum, qH.type, qShipMissSR.playerId);
+                        break;
+
                     case QueueType.PHYSICS_SR:
                         // Read the correct type of data
                         Physics_SR qPhysSR = (Physics_SR)qH;
@@ -111,6 +118,7 @@ namespace OmegaRace
                         Debug.WriteLine("Send -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}, A_ID#{3}, B_ID#{4}, Pos [{5,2}, {6,2}] ",
                             qH.inSeqNum, qH.outSeqNum, qH.type, qColEvent_SR.GameObjA_ID, qColEvent_SR.GameObjB_ID, qColEvent_SR.ColPos.X, qColEvent_SR.ColPos.Y);
                         break;
+                        
                     default:
                         break;
                 }

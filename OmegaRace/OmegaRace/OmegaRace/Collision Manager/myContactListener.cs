@@ -41,6 +41,17 @@ namespace OmegaRace
             Debug.Assert(B != null);
 
             pushToOutQueue(A.id, B.id, ptA);
+            if (A.CollideAvailable == true && B.CollideAvailable == true)
+            {
+                if (A.type < B.type)
+                {
+                    A.Accept(B, ptA);
+                }
+                else
+                {
+                    B.Accept(A, ptA);
+                }
+            }
 
             if (A.type == GameObjType.p1missiles || A.type == GameObjType.p2missiles)
             {

@@ -17,6 +17,8 @@ namespace OmegaRace
     public enum QueueType
     {
         SHIP_RS,            // remote to server Ship action state
+        SHIP_MISSILE_SR,    // server to remote to create a missile
+        SHIP_BOMB_SR,       // server to remote to create a bomb
         PHYSICS_SR,         // server to remote Ship pos & rot
         COL_EVENT_SR,       // server to remote collision event
     }
@@ -81,12 +83,35 @@ namespace OmegaRace
             }
             if (missle > -1)
             {
-                player.createMissile();
+                //player.createMissile();
+                Ship_Missile_SR qShipMissSR = new Ship_Missile_SR((PlayerID)missle);
+                OutputQueue.Instance.add(qShipMissSR);
             }
             if (bomb > -1)
             {
                 GameObjManager.Instance().createBomb(player.id);
             }
+        }
+    }
+
+    class Ship_Missile_SR : Message
+    {
+        public PlayerID playerId;
+
+        public Ship_Missile_SR(PlayerID _id)
+        {
+            playerId = _id;
+        }
+
+        public override QueueType getQueueType()
+        {
+            return QueueType.SHIP_MISSILE_SR;
+        }
+
+        public override void execute()
+        {
+            Player player = PlayerManager.Instance().getPlayer(playerId);
+            player.createMissile();
         }
     }
 
@@ -149,6 +174,10 @@ namespace OmegaRace
 
         override public void execute()
         {
+            if (Game1.GameInstance.isHost)
+            {
+                return;
+            }
             GameObject A = GameObjManager.Instance().findGameObj(this.GameObjA_ID).gameObj;
             GameObject B = GameObjManager.Instance().findGameObj(this.GameObjB_ID).gameObj;
             Vector2 Cpos = this.ColPos;

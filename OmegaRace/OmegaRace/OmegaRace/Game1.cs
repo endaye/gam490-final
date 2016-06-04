@@ -70,6 +70,9 @@ namespace OmegaRace
         SpriteBatch spriteBatch;
         SpriteFont font;
 
+        // Host or Remote ?
+        public bool isHost;
+
         // Error message
         string errorMessage;
 
@@ -251,6 +254,7 @@ namespace OmegaRace
             {
                 networkSession = NetworkSession.Create(NetworkSessionType.SystemLink, maxLocalGamers, maxGamers);
                 playerCtrl = player1;
+                isHost = true;
                 HookSessionEvents();
             }
             catch (Exception e)
@@ -280,6 +284,7 @@ namespace OmegaRace
                     // Join the first session we found.
                     networkSession = NetworkSession.Join(availableSessions[0]);
                     playerCtrl = player2;
+                    isHost = false;
                     HookSessionEvents();
                 }
             }
@@ -512,20 +517,14 @@ namespace OmegaRace
 
             if ((oldState.IsKeyDown(Keys.X) && newState.IsKeyUp(Keys.X)) || (P1oldPadState.IsButtonDown(Buttons.A) && P1newPadState.IsButtonUp(Buttons.A)))
             {
-                if (playerCtrl.state == PlayerState.alive && playerCtrl.missileAvailable())
-                {
-                    playerCtrl.createMissile();
-                    
-                }
-                
-
+                missle = (int)playerCtrl.id;
             }
 
             if (oldState.IsKeyDown(Keys.C) && newState.IsKeyUp(Keys.C) || (P1oldPadState.IsButtonDown(Buttons.B) && P1newPadState.IsButtonUp(Buttons.B)))
             {
                 //if (player1.state == PlayerState.alive && BombManager.Instance().bombAvailable(PlayerID.one))
                 //    GameObjManager.Instance().createBomb(PlayerID.one);
-                bomb = -1;
+                bomb = (int)playerCtrl.id;
             }
 
             #endregion

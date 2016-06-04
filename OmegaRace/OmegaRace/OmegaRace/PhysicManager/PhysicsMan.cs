@@ -23,7 +23,7 @@ namespace OmegaRace
             return instance;
         }
 
-        public void addPhysicsObj(GameObject _gameObj,Body _body)
+        public void addPhysicsObj(GameObject _gameObj, Body _body)
         {
             PhysicsObj obj = new PhysicsObj(_gameObj, _body);
             _gameObj.physicsObj = obj;

@@ -69,11 +69,11 @@ namespace OmegaRace
                 int inSeqNum = packetReader.ReadInt32();
                 int outSeqNum = packetReader.ReadInt32();
                 QueueType type = (QueueType)packetReader.ReadInt32();
-
+                CollisionManager.PlayerID id;
                 switch (type)
                 {
                     case QueueType.SHIP_RS:
-                        CollisionManager.PlayerID id = (CollisionManager.PlayerID)packetReader.ReadInt32();
+                        id = (CollisionManager.PlayerID)packetReader.ReadInt32();
                         float rot = packetReader.ReadSingle();
                         float imp = packetReader.ReadSingle();
                         int missle = packetReader.ReadInt32();
@@ -83,6 +83,15 @@ namespace OmegaRace
                         qShipRS.outSeqNum = outSeqNum;
                         qShipRS.type = type;
                         this.add(qShipRS);
+                        break;
+
+                    case QueueType.SHIP_MISSILE_SR:
+                        id = (CollisionManager.PlayerID)packetReader.ReadInt32();
+                        Ship_Missile_SR qShipMissSR = new Ship_Missile_SR(id);
+                        qShipMissSR.inSeqNum = inSeqNum;
+                        qShipMissSR.outSeqNum = outSeqNum;
+                        qShipMissSR.type = type;
+                        this.add(qShipMissSR);
                         break;
 
                     case QueueType.PHYSICS_SR:
@@ -112,7 +121,7 @@ namespace OmegaRace
                         Col_Event_SR qColEvent_SR = new Col_Event_SR(GameObjA_ID, GameObjB_ID, ColPos);
                         this.add(qColEvent_SR);
                         break;
-                         
+               
                     default:
                         break;
                 }
@@ -133,41 +142,6 @@ namespace OmegaRace
                 Message qH = _q.Dequeue();
                 Debug.WriteLine("Recv -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}", qH.inSeqNum, qH.outSeqNum, qH.type);
                 qH.execute();
-                //switch (qH.type)
-                //{
-                //    case QueueType.SHIP_RS:
-                //        if (localGamer.IsHost)
-                //        {
-                //            // Read the correct type of data
-                //            ShipMsg_RS qShipRS = (ShipMsg_RS)qH.data;
-                //            player = PlayerManager.Instance().getPlayer(qShipRS.playerId);
-                //            player.playerShip.Update(qShipRS);
-                //            Debug.WriteLine("Recv -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}->{3}, Player {4}, rot {5}, imp {6}",
-                //                qH.inSeqNum, qH.outSeqNum, qH.type, qShipRS.GetType(), qShipRS.playerId, qShipRS.rotation, qShipRS.impulse);
-                //        }
-                //        break;
-
-                //    case QueueType.Physics_SR:
-                //        // Read the correct type of data
-                //        ShipMsg_SR qShipSR = (ShipMsg_SR)qH.data;
-                //        player = PlayerManager.Instance().getPlayer(qShipSR.playerId);
-                //        player.playerShip.Update(qShipSR);
-
-                //        //Debug.WriteLine("PlayerID {0}",qShipSR.playerId.ToString());
-                //        Debug.WriteLine("Recv -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}->{3}, Player {4}, rot {5}, pos [{6}, {7}]",
-                //            qH.inSeqNum, qH.outSeqNum, qH.type, qShipSR.GetType(), qShipSR.playerId, qShipSR.rot, qShipSR.x, qShipSR.y);
-                //        break;
-
-                //    case QueueType.GAMEOBJ_SR:
-                //        GameObjMsg_SR qGameSR = (GameObjMsg_SR)qH.data;
-                //        GameObjManager.Instance().RevieveFromeInQ(qGameSR);
-                //        Debug.WriteLine("Recv -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}->{3}, GameObjID {4} #{5}",
-                //            qH.inSeqNum, qH.outSeqNum, qH.type, qGameSR.GetType(), qGameSR.gameObjId, qGameSR.state);
-                //        break;
-                //    default:
-                //        break;
-                        
-                //}
             }
         }
     }
