@@ -176,7 +176,7 @@ namespace OmegaRace
 
                 b.spriteRef.sprite.image = b.image1;
 
-                GameObjManager.Instance().remove(batchEnum.bomb, b);
+                //GameObjManager.Instance().remove(batchEnum.bomb, b);
 
                 BombManager.Instance().addBomb(b);
 

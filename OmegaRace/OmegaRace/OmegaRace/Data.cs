@@ -35,12 +35,17 @@ namespace OmegaRace
 
         public void createData()
         {
-            createShip1(new Vector2(150, 60), - (float)(90.0f * (Math.PI / 180.0f)));
-            createShip2(new Vector2(150, 130),  (float)(90.0f * (Math.PI / 180.0f)));
+            createShip1(new Vector2(150, 60), -(float)(90.0f * (Math.PI / 180.0f)));
+            createShip2(new Vector2(150, 130), (float)(90.0f * (Math.PI / 180.0f)));
             for (int i = 0; i < 3; i++)
             {
                 createMissile(PlayerID.one);
                 createMissile(PlayerID.two);
+            }
+            for (int i = 0; i < 5; i++)
+            {
+                createBomb(PlayerID.one);
+                createBomb(PlayerID.two);
             }
             createFences();
             createFencePosts();
@@ -61,7 +66,7 @@ namespace OmegaRace
             shipBatch.addDisplayObject(proxyShip);
 
             //////////////////////////////////////
-           
+
 
             // Box2D Body Setup/////////////////////////
             var shipShape = new PolygonShape();
@@ -76,7 +81,7 @@ namespace OmegaRace
 
             shipShape.Set(verts, 5);
             shipShape._centroid = new Vector2(0, 0);
-            
+
 
             var fd = new FixtureDef();
             fd.shape = shipShape;
@@ -90,13 +95,14 @@ namespace OmegaRace
             bd.fixedRotation = true;
             bd.type = BodyType.Dynamic;
             bd.position = p1.spriteRef.pos;
-            
+
 
             var body = world.CreateBody(bd);
-           
+
             body.CreateFixture(fd);
             body.SetUserData(p1);
             body.Rotation = _rot;
+            body.SetAwake(false);
             ///////////////////////////////////////
 
             // Set sprite body reference
@@ -106,7 +112,7 @@ namespace OmegaRace
             // Set Player's ship and add it to the GameObjManager //////////////
             PlayerManager.Instance().getPlayer(PlayerID.one).setShip(p1);
 
-            GameObjManager.Instance().addGameObj(p1); 
+            GameObjManager.Instance().addGameObj(p1);
         }
 
         public void createShip2(Vector2 pos, float _rot)
@@ -149,7 +155,7 @@ namespace OmegaRace
             bd.fixedRotation = true;
             bd.type = BodyType.Dynamic;
             bd.position = new Vector2(p2.spriteRef.pos.X, p2.spriteRef.pos.Y);
-           
+
             var body = world.CreateBody(bd);
 
             body.CreateFixture(fd);
@@ -171,7 +177,7 @@ namespace OmegaRace
             Body pShipBody = pShip.physicsObj.body;
 
             //Vector2 initPos = new Vector2(pShip.spriteRef.pos.X, pShip.spriteRef.pos.Y); 
-            Vector2 initPos = new Vector2(20.0f + 15 * globalIndex++, 20.0f); 
+            Vector2 initPos = new Vector2(20.0f + 15 * globalIndex++, 20.0f);
 
             ////////////////  For Sprite System use ///////////////
             Sprite missileSprite = (Sprite)DisplayManager.Instance().getDisplayObj(SpriteEnum.Missile);
@@ -225,6 +231,23 @@ namespace OmegaRace
             GameObjManager.Instance().addGameObj(missile);
         }
 
+        public void createBomb(PlayerID _id)
+        {
+            Player player = PlayerManager.Instance().getPlayer(_id);
+
+            player.removeBombSprite();
+
+            Ship pShip = player.playerShip;
+            Body pShipBody = pShip.physicsObj.body;
+
+            Bomb bomb;
+
+            if (_id == PlayerID.one)
+                bomb = new Bomb(GameObjType.p1Bomb, _id, pShip);
+            else
+                bomb = new Bomb(GameObjType.p2Bomb, _id, pShip);
+        }
+
         #region Fences
 
         private void createFences()
@@ -263,10 +286,10 @@ namespace OmegaRace
 
             Sprite wallSprite = (Sprite)DisplayManager.Instance().getDisplayObj(SpriteEnum.fence1);
 
-           // Sprite wallSprite = (Sprite)DisplayManager.Instance().getDisplayObj(SpriteEnum.Wall);
+            // Sprite wallSprite = (Sprite)DisplayManager.Instance().getDisplayObj(SpriteEnum.Wall);
             Sprite_Proxy wallProxy = new Sprite_Proxy(wallSprite, 40, 5, fenceScale, Color.White);
             Wall wall1 = new Wall(GameObjType.horzWalls, wallProxy);
-            
+
 
             SBNode wallBatch = SpriteBatchManager.Instance().getBatch(batchEnum.boxs);
             wallBatch.addDisplayObject(wallProxy);
@@ -277,7 +300,7 @@ namespace OmegaRace
 
             var wallShape = new PolygonShape();
 
-            wallShape.SetAsBox(wall1.spriteRef.sprite.width /2 , wall1.spriteRef.sprite.height / 2);
+            wallShape.SetAsBox(wall1.spriteRef.sprite.width / 2, wall1.spriteRef.sprite.height / 2);
 
             var fd = new FixtureDef();
             fd.shape = wallShape;
@@ -302,7 +325,7 @@ namespace OmegaRace
             PhysicsMan.Instance().addPhysicsObj(wall1, body);
 
             /////////////////////
-           
+
         }
 
         private void createFence2()
@@ -332,7 +355,7 @@ namespace OmegaRace
 
             var wallShape = new PolygonShape();
 
-            wallShape.SetAsBox(wall1.spriteRef.sprite.width/2 , wall1.spriteRef.sprite.height/2);
+            wallShape.SetAsBox(wall1.spriteRef.sprite.width / 2, wall1.spriteRef.sprite.height / 2);
 
             var fd = new FixtureDef();
             fd.shape = wallShape;
@@ -382,7 +405,7 @@ namespace OmegaRace
 
             var wallShape = new PolygonShape();
 
-            wallShape.SetAsBox(wall1.spriteRef.sprite.width/2 , wall1.spriteRef.sprite.height/2);
+            wallShape.SetAsBox(wall1.spriteRef.sprite.width / 2, wall1.spriteRef.sprite.height / 2);
 
             var fd = new FixtureDef();
             fd.shape = wallShape;
@@ -432,7 +455,7 @@ namespace OmegaRace
 
             var wallShape = new PolygonShape();
 
-            wallShape.SetAsBox(wall1.spriteRef.sprite.width/2, wall1.spriteRef.sprite.height/2);
+            wallShape.SetAsBox(wall1.spriteRef.sprite.width / 2, wall1.spriteRef.sprite.height / 2);
 
             var fd = new FixtureDef();
             fd.shape = wallShape;
@@ -482,7 +505,7 @@ namespace OmegaRace
 
             PolygonShape wallShape = new PolygonShape();
 
-            wallShape.SetAsBox(wall1.spriteRef.sprite.width/2, wall1.spriteRef.sprite.height/2 );
+            wallShape.SetAsBox(wall1.spriteRef.sprite.width / 2, wall1.spriteRef.sprite.height / 2);
 
             var fd = new FixtureDef();
             fd.shape = wallShape;
@@ -532,7 +555,7 @@ namespace OmegaRace
 
             var wallShape = new PolygonShape();
 
-            wallShape.SetAsBox(wall1.spriteRef.sprite.width/2 , wall1.spriteRef.sprite.height/2 );
+            wallShape.SetAsBox(wall1.spriteRef.sprite.width / 2, wall1.spriteRef.sprite.height / 2);
 
             var fd = new FixtureDef();
             fd.shape = wallShape;
@@ -580,7 +603,7 @@ namespace OmegaRace
 
             var wallShape = new PolygonShape();
 
-            wallShape.SetAsBox(wall1.spriteRef.sprite.width/2 , wall1.spriteRef.sprite.height/2 );
+            wallShape.SetAsBox(wall1.spriteRef.sprite.width / 2, wall1.spriteRef.sprite.height / 2);
 
             var fd = new FixtureDef();
             fd.shape = wallShape;
@@ -628,7 +651,7 @@ namespace OmegaRace
 
             var wallShape = new PolygonShape();
 
-            wallShape.SetAsBox(wall1.spriteRef.sprite.width/2 , wall1.spriteRef.sprite.height/2 );
+            wallShape.SetAsBox(wall1.spriteRef.sprite.width / 2, wall1.spriteRef.sprite.height / 2);
 
             var fd = new FixtureDef();
             fd.shape = wallShape;
@@ -676,7 +699,7 @@ namespace OmegaRace
 
             var wallShape = new PolygonShape();
 
-            wallShape.SetAsBox(wall1.spriteRef.sprite.width/2, wall1.spriteRef.sprite.height/2);
+            wallShape.SetAsBox(wall1.spriteRef.sprite.width / 2, wall1.spriteRef.sprite.height / 2);
 
             var fd = new FixtureDef();
             fd.shape = wallShape;
@@ -697,7 +720,7 @@ namespace OmegaRace
             GameObjManager.Instance().addGameObj(wall1);
             PhysicsMan.Instance().addPhysicsObj(wall1, body);
             /////////////////////
-           
+
         }
 
         private void createFence10()
@@ -726,7 +749,7 @@ namespace OmegaRace
 
             var wallShape = new PolygonShape();
 
-            wallShape.SetAsBox(wall1.spriteRef.sprite.width/2 , wall1.spriteRef.sprite.height/2 );
+            wallShape.SetAsBox(wall1.spriteRef.sprite.width / 2, wall1.spriteRef.sprite.height / 2);
 
             var fd = new FixtureDef();
             fd.shape = wallShape;
@@ -763,7 +786,7 @@ namespace OmegaRace
 
 
             Sprite_Proxy wallProxy = new Sprite_Proxy(wallSprite, 186, 190, fenceScale, Color.White);
-            
+
             Wall wall1 = new Wall(GameObjType.horzWalls, wallProxy);
 
 
@@ -776,7 +799,7 @@ namespace OmegaRace
 
             var wallShape = new PolygonShape();
 
-            wallShape.SetAsBox(wall1.spriteRef.sprite.width/2 , wall1.spriteRef.sprite.height/2 );
+            wallShape.SetAsBox(wall1.spriteRef.sprite.width / 2, wall1.spriteRef.sprite.height / 2);
 
             var fd = new FixtureDef();
             fd.shape = wallShape;
@@ -825,7 +848,7 @@ namespace OmegaRace
 
             var wallShape = new PolygonShape();
 
-            wallShape.SetAsBox(wall1.spriteRef.sprite.width/2 , wall1.spriteRef.sprite.height/2);
+            wallShape.SetAsBox(wall1.spriteRef.sprite.width / 2, wall1.spriteRef.sprite.height / 2);
 
             var fd = new FixtureDef();
             fd.shape = wallShape;
@@ -880,7 +903,7 @@ namespace OmegaRace
 
 
             Sprite_Proxy wallProxy = new Sprite_Proxy(wallSprite, 150, 71, fenceScale, Color.White);
-            
+
             Wall wall1 = new Wall(GameObjType.horzWalls, wallProxy);
 
 
@@ -1059,9 +1082,9 @@ namespace OmegaRace
             PhysicsMan.Instance().addPhysicsObj(wall1, body);
             /////////////////////
         }
-        
+
         ////////////////
-        
+
         private void createFencePosts()
         {
 

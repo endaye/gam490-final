@@ -85,7 +85,8 @@ namespace OmegaRace
             }
             if (bomb > -1)
             {
-                GameObjManager.Instance().createBomb(player.id);
+                //GameObjManager.Instance().createBomb(player.id);
+                //player.launchBomb();
             }
         }
     }
