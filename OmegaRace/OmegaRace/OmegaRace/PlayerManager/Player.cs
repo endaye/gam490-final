@@ -6,7 +6,6 @@ using SpriteAnimation;
 using Microsoft.Xna.Framework;
 using Box2D.XNA;
 using OmegaRace;
-using System.Diagnostics;
 
 namespace CollisionManager
 {
@@ -22,14 +21,17 @@ namespace CollisionManager
         alive,
         dead
     }
+
     
+
+
     class Player
     {
         public PlayerID id;
         public int lives;
 
         public Ship playerShip;
-        
+
         // Life Sprites
         public Sprite_Proxy lifeSprite1;
         public Sprite_Proxy lifeSprite2;
@@ -49,9 +51,7 @@ namespace CollisionManager
         public Color color;
 
         private int numMissiles;
-        public Missile[] playerMissles;
-        public Bomb[] playerBombs;
-
+        
         private int bombSpriteIndex;
         private GameObjType missileType;
 
@@ -80,9 +80,6 @@ namespace CollisionManager
 
             bombSpriteIndex = 5;
             numMissiles = 3;
-
-            playerMissles = new Missile[numMissiles];
-            playerBombs = new Bomb[bombSpriteIndex];
         }
 
        
@@ -241,33 +238,6 @@ namespace CollisionManager
                 return false;
         }
 
-        public void launchMissle()
-        {
-            if (this.state == PlayerState.alive)
-            {
-                foreach (Missile m in playerMissles)
-                {
-                    Debug.Assert(m != null);
-                    if (m.isAvailable)
-                    {
-                        m.Launch(id);
-                        break;
-                    }
-                }
-            }
-        }
-
-        public void setMissle(Missile _m)
-        {
-            for (int i = 0; i < numMissiles; i++)
-            {
-                if (playerMissles[i] == null)
-                {
-                    playerMissles[i] = _m;
-                    break;
-                }
-            }
-        }
 
         public void createMissile()
         {
@@ -342,11 +312,11 @@ namespace CollisionManager
                 numMissiles--;
         }
 
-        //public void increaseNumMissiles()
-        //{
-        //    if(numMissiles < 3)
-        //        numMissiles++;
-        //}
+        public void increaseNumMissiles()
+        {
+            if(numMissiles < 3)
+                numMissiles++;
+        }
 
         public void removeBombSprite()
         {

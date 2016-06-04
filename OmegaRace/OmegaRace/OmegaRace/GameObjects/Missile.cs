@@ -18,11 +18,6 @@ namespace CollisionManager
         WaveBank waveBank;
 
         public PlayerID owner;
-        public bool isAvailable;
-
-        public int index;
-
-        Vector2 initPos;
 
         public Missile(GameObjType _type, Sprite_Proxy _spriteRef, PlayerID _owner)
         {
@@ -30,43 +25,15 @@ namespace CollisionManager
 
             spriteRef = _spriteRef;
 
-            isAvailable = true;
+            objSpeed = new Vector2(0, -15);
 
             soundBank = SoundBankManager.SoundBank();
             waveBank = WaveBankManager.WaveBank();
 
             owner = _owner;
 
-            initPos = _spriteRef.pos;
-        }
-
-        public void Launch(PlayerID id)
-        {
-            Ship pShip = PlayerManager.Instance().getPlayer(id).playerShip;
-            Body pShipBody = pShip.physicsObj.body;
-            Body missleBody = this.physicsObj.body;
-            objSpeed = new Vector2(0, -15);
-            isAvailable = false;
-            Vector2 direction = new Vector2((float)(Math.Cos(pShipBody.GetAngle())), (float)(Math.Sin(pShipBody.GetAngle())));
-            direction.Normalize();
-            missleBody.Position = (new Vector2(pShip.spriteRef.pos.X, pShip.spriteRef.pos.Y)) + (direction * 10);
-
-            missleBody.Rotation = pShipBody.Rotation;
-            direction *= 1000;
-            missleBody.ApplyLinearImpulse(direction, missleBody.GetWorldCenter());
-
             playFireSound();
         }
-
-        public void Reset()
-        {
-            this.physicsObj.body.Rotation = 0.0f;
-            this.physicsObj.body.Position = initPos;
-            this.isAvailable = true;
-            this.physicsObj.body.SetAwake(false);
-        }
-
-
 
         public override void Update()
         {
@@ -103,7 +70,7 @@ namespace CollisionManager
             BombManager.Instance().removeBomb(b, b.spriteRef.pos, b.spriteRef.color);
             GameObjManager.Instance().remove(batchEnum.missiles, m);
 
-            //PlayerManager.Instance().getPlayer(m.owner).increaseNumMissiles();
+            PlayerManager.Instance().getPlayer(m.owner).increaseNumMissiles();
 
             playMissileHitSound();
         }
@@ -114,11 +81,9 @@ namespace CollisionManager
             Vector2 pos = _point;
 
             GameObjManager.Instance().addExplosion(pos, m.spriteRef.color);
-            //GameObjManager.Instance().remove(batchEnum.missiles, m);
+            GameObjManager.Instance().remove(batchEnum.missiles, m);
 
-            m.Reset();
-
-            //PlayerManager.Instance().getPlayer(m.owner).increaseNumMissiles();
+            PlayerManager.Instance().getPlayer(m.owner).increaseNumMissiles();
 
             playMissileHitSound();
 
@@ -131,12 +96,11 @@ namespace CollisionManager
             Vector2 pos = _point;
 
             GameObjManager.Instance().addExplosion(pos, m1.spriteRef.color);
-            //GameObjManager.Instance().remove(batchEnum.missiles, m1);
-            //GameObjManager.Instance().remove(batchEnum.missiles, m2);
-            m1.Reset();
-            m2.Reset();
-            //PlayerManager.Instance().getPlayer(m1.owner).increaseNumMissiles();
-            //PlayerManager.Instance().getPlayer(m2.owner).increaseNumMissiles();
+            GameObjManager.Instance().remove(batchEnum.missiles, m1);
+            GameObjManager.Instance().remove(batchEnum.missiles, m2);
+
+            PlayerManager.Instance().getPlayer(m1.owner).increaseNumMissiles();
+            PlayerManager.Instance().getPlayer(m2.owner).increaseNumMissiles();
 
             playMissileHitSound();
         }
@@ -149,9 +113,7 @@ namespace CollisionManager
 
                 GameObjManager.Instance().addExplosion(s.spriteRef.pos, s.spriteRef.color);
                 GameObjManager.Instance().remove(batchEnum.ships, s);
-                //GameObjManager.Instance().remove(batchEnum.missiles, m);
-                m.Reset();
-                s.Vanish();
+                GameObjManager.Instance().remove(batchEnum.missiles, m);
 
                 s.hit(PlayerID.one);
 
@@ -160,7 +122,7 @@ namespace CollisionManager
                 playMissileHitSound();
                 playShipHitSound();
 
-                //PlayerManager.Instance().getPlayer(m.owner).increaseNumMissiles();
+                PlayerManager.Instance().getPlayer(m.owner).increaseNumMissiles();
 
             }
 
@@ -168,10 +130,8 @@ namespace CollisionManager
             {
 
                 GameObjManager.Instance().addExplosion(s.spriteRef.pos, s.spriteRef.color);
-                //GameObjManager.Instance().remove(batchEnum.ships, s);
-                //GameObjManager.Instance().remove(batchEnum.missiles, m);
-                m.Reset();
-                s.Vanish();
+                GameObjManager.Instance().remove(batchEnum.ships, s);
+                GameObjManager.Instance().remove(batchEnum.missiles, m);
 
                 s.hit(PlayerID.two);
 
@@ -180,7 +140,7 @@ namespace CollisionManager
                 playMissileHitSound();
                 playShipHitSound();
 
-                //PlayerManager.Instance().getPlayer(m.owner).increaseNumMissiles();
+                PlayerManager.Instance().getPlayer(m.owner).increaseNumMissiles();
             }
             else { }
             

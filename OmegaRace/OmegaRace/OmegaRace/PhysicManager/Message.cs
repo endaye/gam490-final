@@ -81,7 +81,7 @@ namespace OmegaRace
             }
             if (missle > -1)
             {
-                player.launchMissle();
+                player.createMissile();
             }
             if (bomb > -1)
             {
@@ -158,15 +158,19 @@ namespace OmegaRace
                 Debug.Assert(A != null);
                 Debug.Assert(B != null);
 
-                if (A.type < B.type)
+                if (A.CollideAvailable == true && B.CollideAvailable == true)
                 {
-                    A.Accept(B, Cpos);
+                    if (A.type < B.type)
+                    {
+                        A.Accept(B, Cpos);
+                    }
+                    else
+                    {
+                        B.Accept(A, Cpos);
+                    }
                 }
-                else
-                {
-                    B.Accept(A, Cpos);
-                }
-            } 
+            }
+            
         }
     }
 

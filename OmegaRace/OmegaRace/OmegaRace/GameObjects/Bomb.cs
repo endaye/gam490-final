@@ -95,7 +95,7 @@ namespace CollisionManager
 
             GameObjManager.Instance().remove(batchEnum.missiles, m);
 
-            //PlayerManager.Instance().getPlayer(m.owner).increaseNumMissiles();
+            PlayerManager.Instance().getPlayer(m.owner).increaseNumMissiles();
         }
 
 

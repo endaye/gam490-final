@@ -512,12 +512,13 @@ namespace OmegaRace
 
             if ((oldState.IsKeyDown(Keys.X) && newState.IsKeyUp(Keys.X)) || (P1oldPadState.IsButtonDown(Buttons.A) && P1newPadState.IsButtonUp(Buttons.A)))
             {
-                //if (playerCtrl.state == PlayerState.alive && playerCtrl.missileAvailable())
-                //{
-                //    //playerCtrl.createMissile();
-                //    playerCtrl.launchMissle();
-                //}
-                missle = 1;
+                if (playerCtrl.state == PlayerState.alive && playerCtrl.missileAvailable())
+                {
+                    playerCtrl.createMissile();
+                    
+                }
+                
+
             }
 
             if (oldState.IsKeyDown(Keys.C) && newState.IsKeyUp(Keys.C) || (P1oldPadState.IsButtonDown(Buttons.B) && P1newPadState.IsButtonUp(Buttons.B)))
