@@ -89,9 +89,6 @@ namespace OmegaRace
                     break;
                 }
             }
-
-            
-
             return outData;
         }
 
