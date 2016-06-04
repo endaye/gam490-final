@@ -59,7 +59,11 @@ namespace OmegaRace
                 PhysicsBuffer[] physBuff = Physics_SR.pBufferGlobal.pBuffer;
                 for (int i = 0; i < count; i++)
                 {
-                    GameObjManager.Instance().findGameObj(physBuff[i].id).gameObj.physicsObj.setPhysicsBufferNode(physBuff[i]);
+                    GameObjNode g = GameObjManager.Instance().findGameObj(physBuff[i].id);
+                    if (g != null)
+                    {
+                        g.gameObj.physicsObj.setPhysicsBufferNode(physBuff[i]);
+                    }
                 }
             }
         }
@@ -84,7 +88,6 @@ namespace OmegaRace
         public void removePhysicsObj(PhysicsObj _obj)
         {
             this.privActiveRemoveNode((ManLink)_obj, ref this.active);
-
         }
 
         protected override object privGetNewObj()

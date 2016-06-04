@@ -81,15 +81,22 @@ namespace OmegaRace
                         packetWriter.Write(qShipRS.missle);
                         packetWriter.Write(qShipRS.bomb);
                         localGamer.SendData(packetWriter, SendDataOptions.InOrder);
-                        Debug.WriteLine("Send -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}, Player {3}, rot {4}, imp {5}",
+                        Debug.WriteLine("Send -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}, Player.{3}, rot {4}, imp {5}",
                             qH.inSeqNum, qH.outSeqNum, qH.type, qShipRS.playerId, qShipRS.rotation, qShipRS.impulse);
                         break;
 
                     case QueueType.SHIP_MISSILE_SR:
                         Ship_Missile_SR qShipMissSR = (Ship_Missile_SR)qH;
                         packetWriter.Write((int)qShipMissSR.playerId);
-                        Debug.WriteLine("Send -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}, Player {3}",
+                        Debug.WriteLine("Send -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}, Player.{3} launchs a missile",
                            qH.inSeqNum, qH.outSeqNum, qH.type, qShipMissSR.playerId);
+                        break;
+
+                    case QueueType.SHIP_BOMB_SR:
+                        Ship_Bomb_SR qShipBombSR = (Ship_Bomb_SR)qH;
+                        packetWriter.Write((int)qShipBombSR.playerId);
+                        Debug.WriteLine("Send -> InSeqNum {0,6}, OutSeqNum {1,6}, {2}, Player.{3} launchs a bomb",
+                           qH.inSeqNum, qH.outSeqNum, qH.type, qShipBombSR.playerId);
                         break;
 
                     case QueueType.PHYSICS_SR:

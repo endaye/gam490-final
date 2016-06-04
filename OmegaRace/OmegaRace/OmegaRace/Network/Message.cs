@@ -51,11 +51,11 @@ namespace OmegaRace
 
         public Ship_RS(PlayerID _id, float _rot, float _imp, int _missle, int _bomb)
         {
-           playerId = _id;
-           rotation = _rot;
-           impulse = _imp;
-           missle = _missle;
-           bomb = _bomb;
+            playerId = _id;
+            rotation = _rot;
+            impulse = _imp;
+            missle = _missle;
+            bomb = _bomb;
         }
 
         public override QueueType getQueueType()
@@ -89,7 +89,12 @@ namespace OmegaRace
             }
             if (bomb > -1)
             {
-                GameObjManager.Instance().createBomb(player.id);
+                //GameObjManager.Instance().createBomb(player.id);
+                if (player.state == PlayerState.alive && BombManager.Instance().bombAvailable(player.id))
+                {
+                    Ship_Bomb_SR qShipBombSR = new Ship_Bomb_SR((PlayerID)bomb);
+                    OutputQueue.Instance.add(qShipBombSR);
+                }
             }
         }
     }
@@ -112,6 +117,30 @@ namespace OmegaRace
         {
             Player player = PlayerManager.Instance().getPlayer(playerId);
             player.createMissile();
+        }
+    }
+
+    class Ship_Bomb_SR : Message
+    {
+        public PlayerID playerId;
+
+        public Ship_Bomb_SR(PlayerID _id)
+        {
+            playerId = _id;
+        }
+
+        public override QueueType getQueueType()
+        {
+            return QueueType.SHIP_BOMB_SR;
+        }
+
+        public override void execute()
+        {
+            Player player = PlayerManager.Instance().getPlayer(playerId);
+            if (player.state == PlayerState.alive && BombManager.Instance().bombAvailable(player.id))
+            {
+                GameObjManager.Instance().createBomb(playerId);
+            }
         }
     }
 
@@ -178,12 +207,15 @@ namespace OmegaRace
             {
                 return;
             }
-            GameObject A = GameObjManager.Instance().findGameObj(this.GameObjA_ID).gameObj;
-            GameObject B = GameObjManager.Instance().findGameObj(this.GameObjB_ID).gameObj;
+            GameObjNode ANode = GameObjManager.Instance().findGameObj(this.GameObjA_ID);
+            GameObjNode BNode = GameObjManager.Instance().findGameObj(this.GameObjB_ID);
             Vector2 Cpos = this.ColPos;
 
-            if (A != null && B != null)
+            if (ANode != null && BNode != null)
             {
+                GameObject A = ANode.gameObj;
+                GameObject B = BNode.gameObj;
+
                 Debug.Assert(A != null);
                 Debug.Assert(B != null);
 
@@ -199,7 +231,7 @@ namespace OmegaRace
                     }
                 }
             }
-            
+
         }
     }
 
@@ -234,7 +266,7 @@ namespace OmegaRace
     //    abstract public QueueType getQueueType();
     //}
 
-    
+
 
 
     //abstract class Ship_Message : Message

@@ -61,6 +61,10 @@ namespace SpriteAnimation
 
         public Sprite_Proxy(Sprite _ref, float _screenX, float _screenY, float _scale, Color _color)
         {
+            if (_ref == null)
+            {
+                return;
+            }
             sprite = _ref;
             pos = new Vector2(_screenX, _screenY);
             color = _color;

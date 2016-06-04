@@ -253,7 +253,7 @@ namespace CollisionManager
             }
 
             spriteRef.sprite.image = image1;
-
+           
             curImage = 0;
 
             state = BombState.alive;

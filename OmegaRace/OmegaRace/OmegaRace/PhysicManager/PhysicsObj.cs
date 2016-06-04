@@ -39,8 +39,16 @@ namespace OmegaRace
 
         public void setPhysicsBufferNode(PhysicsBuffer physBuffNode)
         {
-            this.body.Rotation = physBuffNode.rot;
-            this.body.Position = physBuffNode.pos;
+            try
+            {
+                this.body.Rotation = physBuffNode.rot;
+                this.body.Position = physBuffNode.pos;
+            }
+            catch
+            {
+                throw new System.NullReferenceException("physBuffNode is NULL");
+            }
+
         }
     }
 }

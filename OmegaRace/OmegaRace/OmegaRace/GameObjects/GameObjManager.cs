@@ -194,7 +194,7 @@ namespace CollisionManager
             Ship pShip = player.playerShip;
             Body pShipBody = pShip.physicsObj.body;
 
-             Bomb bomb;
+            Bomb bomb;
 
             if (_id == PlayerID.one)
                 bomb = new Bomb(GameObjType.p1Bomb, _id, pShip);

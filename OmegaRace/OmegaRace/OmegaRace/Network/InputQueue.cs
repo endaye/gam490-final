@@ -94,6 +94,15 @@ namespace OmegaRace
                         this.add(qShipMissSR);
                         break;
 
+                    case QueueType.SHIP_BOMB_SR:
+                        id = (CollisionManager.PlayerID)packetReader.ReadInt32();
+                        Ship_Bomb_SR qShipBombSR = new Ship_Bomb_SR(id);
+                        qShipBombSR.inSeqNum = inSeqNum;
+                        qShipBombSR.outSeqNum = outSeqNum;
+                        qShipBombSR.type = type;
+                        this.add(qShipBombSR);
+                        break;
+
                     case QueueType.PHYSICS_SR:
                         int count = packetReader.ReadInt32();
                         PhysicsBuffer[] pBuffer = new PhysicsBuffer[count];
