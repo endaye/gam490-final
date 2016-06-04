@@ -269,22 +269,6 @@ namespace CollisionManager
             }
         }
 
-        public void lauchBomb()
-        {
-            if (this.state == PlayerState.alive)
-            {
-                foreach (Bomb b in playerBombs)
-                {
-                    Debug.Assert(b != null);
-                    if (b.isAvailable)
-                    {
-                        //b.armed();
-                        break;
-                    }
-                }
-            }
-        }
-
         public void createMissile()
         {
 

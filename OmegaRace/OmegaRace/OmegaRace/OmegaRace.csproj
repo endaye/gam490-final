@@ -134,7 +134,7 @@
     <Compile Include="Manager\Manager.cs" />
     <Compile Include="Manager\ManLink.cs" />
     <Compile Include="Manager\SpriteNode.cs" />
-    <Compile Include="Network\Message.cs" />
+    <Compile Include="PhysicManager\Message.cs" />
     <Compile Include="MessageDisplayComponent.cs" />
     <Compile Include="Network\InputQueue.cs" />
     <Compile Include="Network\OutputQueue.cs" />

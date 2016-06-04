@@ -43,7 +43,7 @@ namespace CollisionManager
         public Sprite bombsprite;
         public int bombID;
         public BombState state;
-        public bool isAvailable;
+
 
 
         public Bomb(GameObjType _type, PlayerID _owner, Ship s)
@@ -56,8 +56,6 @@ namespace CollisionManager
 
             soundBank = SoundBankManager.SoundBank();
             waveBank = WaveBankManager.WaveBank();
-
-            isAvailable = true;
 
             playBombLaySound();
 

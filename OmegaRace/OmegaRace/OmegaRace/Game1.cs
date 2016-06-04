@@ -524,7 +524,7 @@ namespace OmegaRace
             {
                 //if (player1.state == PlayerState.alive && BombManager.Instance().bombAvailable(PlayerID.one))
                 //    GameObjManager.Instance().createBomb(PlayerID.one);
-                bomb = 1;
+                bomb = -1;
             }
 
             #endregion
