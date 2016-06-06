@@ -171,13 +171,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="cat.tga">
-      <Name>cat</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="chat_able.png">
       <Name>chat_able</Name>
       <Importer>TextureImporter</Importer>

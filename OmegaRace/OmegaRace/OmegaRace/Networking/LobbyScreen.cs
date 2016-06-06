@@ -196,7 +196,7 @@ namespace OmegaRace
             SpriteBatch spriteBatch = ScreenManager.SpriteBatch;
             SpriteFont font = ScreenManager.Font;
 
-            Vector2 position = new Vector2(100, 150);
+            Vector2 position = new Vector2(100, 350);
 
             // Make the lobby slide into place during transitions.
             float transitionOffset = (float)Math.Pow(TransitionPosition, 2);
@@ -229,7 +229,7 @@ namespace OmegaRace
             // Draw the screen title.
             string title = Resources.Lobby;
 
-            Vector2 titlePosition = new Vector2(533, 80);
+            Vector2 titlePosition = new Vector2(400, 80);
             Vector2 titleOrigin = font.MeasureString(title) / 2;
             Color titleColor = new Color(192, 192, 192) * TransitionAlpha;
             float titleScale = 1.25f;

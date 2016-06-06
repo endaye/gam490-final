@@ -29,20 +29,14 @@ namespace OmegaRace
             : base(Resources.MainMenu)
         {
             // Create our menu entries.
-            MenuEntry singlePlayerMenuEntry = new MenuEntry(Resources.SinglePlayer);
-            MenuEntry liveMenuEntry = new MenuEntry(Resources.PlayerMatch);
             MenuEntry systemLinkMenuEntry = new MenuEntry(Resources.SystemLink);
             MenuEntry exitMenuEntry = new MenuEntry(Resources.Exit);
 
             // Hook up menu event handlers.
-            singlePlayerMenuEntry.Selected += SinglePlayerMenuEntrySelected;
-            liveMenuEntry.Selected += LiveMenuEntrySelected;
             systemLinkMenuEntry.Selected += SystemLinkMenuEntrySelected;
             exitMenuEntry.Selected += OnCancel;
 
             // Add entries to the menu.
-            MenuEntries.Add(singlePlayerMenuEntry);
-            MenuEntries.Add(liveMenuEntry);
             MenuEntries.Add(systemLinkMenuEntry);
             MenuEntries.Add(exitMenuEntry);
         }
@@ -53,28 +47,9 @@ namespace OmegaRace
         #region Handle Input
 
 
-        /// <summary>
-        /// Event handler for when the Single Player menu entry is selected.
-        /// </summary>
-        void SinglePlayerMenuEntrySelected(object sender, PlayerIndexEventArgs e)
-        {
-            LoadingScreen.Load(ScreenManager, true, e.PlayerIndex,
-                               new GameplayScreen(null));
-        }
 
 
-        /// <summary>
-        /// Event handler for when the Live menu entry is selected.
-        /// </summary>
-        void LiveMenuEntrySelected(object sender, PlayerIndexEventArgs e)
-        {
-            CreateOrFindSession(NetworkSessionType.PlayerMatch, e.PlayerIndex);
-        }
-
-
-        /// <summary>
         /// Event handler for when the System Link menu entry is selected.
-        /// </summary>
         void SystemLinkMenuEntrySelected(object sender, PlayerIndexEventArgs e)
         {
             CreateOrFindSession(NetworkSessionType.SystemLink, e.PlayerIndex);
@@ -126,7 +101,6 @@ namespace OmegaRace
         {
             ScreenManager.Game.Exit();
         }
-
 
         #endregion
     }

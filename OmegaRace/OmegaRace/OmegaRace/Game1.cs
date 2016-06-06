@@ -45,7 +45,7 @@ namespace OmegaRace
         static readonly string[] preloadAssets =
         {
             "gradient",
-            "cat",
+            "loader",
             "chat_ready",
             "chat_able",
             "chat_talking",

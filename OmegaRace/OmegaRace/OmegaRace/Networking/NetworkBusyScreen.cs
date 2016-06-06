@@ -74,7 +74,7 @@ namespace OmegaRace
             ContentManager content = ScreenManager.Game.Content;
 
             gradientTexture = content.Load<Texture2D>("gradient");
-            catTexture = content.Load<Texture2D>("cat");
+            catTexture = content.Load<Texture2D>("loader");
         }
 
 
