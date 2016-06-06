@@ -62,7 +62,7 @@ namespace OmegaRace
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            font = Game.Content.Load<SpriteFont>("menufont");
+            font = Game.Content.Load<SpriteFont>("SpriteFont1");
         }
 
 
