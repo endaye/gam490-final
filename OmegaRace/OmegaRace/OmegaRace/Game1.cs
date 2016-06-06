@@ -33,11 +33,24 @@ namespace OmegaRace
         #region Fields
 
         GraphicsDeviceManager graphics;
+        ScreenManager screenManager;
+
         public GraphicsDeviceManager Graphics
         {
             get { return graphics; }
         }
 
+        // By preloading any assets used by UI rendering, we avoid framerate glitches
+        // when they suddenly need to be loaded in the middle of a menu transition.
+        static readonly string[] preloadAssets =
+        {
+            "gradient",
+            "cat",
+            "chat_ready",
+            "chat_able",
+            "chat_talking",
+            "chat_mute",
+        };
 
         private static Game1 Game;
         public static Game1 GameInstance
@@ -113,10 +126,9 @@ namespace OmegaRace
 
         public Game1()
         {
-            graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-
-
+            graphics = new GraphicsDeviceManager(this);
+            
             graphics.PreferredBackBufferHeight = screenHeight;
             graphics.PreferredBackBufferWidth = screenWidth;
 
@@ -128,8 +140,25 @@ namespace OmegaRace
 
             Game = this;
 
-            // added this line for login Live accout
+            // Create components.
+            screenManager = new ScreenManager(this);
+
+            Components.Add(screenManager);
+            Components.Add(new MessageDisplayComponent(this));
             Components.Add(new GamerServicesComponent(this));
+
+            // Activate the first screens.
+            screenManager.AddScreen(new BackgroundScreen(), null);
+            screenManager.AddScreen(new MainMenuScreen(), null);
+
+            // Listen for invite notification events.
+            NetworkSession.InviteAccepted += (sender, e)
+                => NetworkSessionComponent.InviteAccepted(screenManager, e);
+
+            // To test the trial mode behavior while developing your game,
+            // uncomment this line:
+
+            // Guide.SimulateTrialMode = true;
         }
 
         #endregion
@@ -177,7 +206,10 @@ namespace OmegaRace
             spriteBatch = new SpriteBatch(GraphicsDevice);
             font = Content.Load<SpriteFont>("SpriteFont1");
 
-
+            foreach (string asset in preloadAssets)
+            {
+                Content.Load<object>(asset);
+            }
         }
 
         /// <summary>
